@@ -33,7 +33,9 @@ async function initDb() {
       amount INTEGER NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       client_id INTEGER,
-      FOREIGN KEY(client_id) REFERENCES clients(client_id) ON DELETE CASCADE
+      loan_id INTEGER,
+      FOREIGN KEY(client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
+      FOREIGN KEY(loan_id) REFERENCES loans(loan_id) ON DELETE CASCADE
     )`
   ).run();
 
@@ -73,7 +75,8 @@ async function initDb() {
       null,
       @amount,
       @created_at,
-      @client_id
+      @client_id,
+      @loan_id
     )
   `);
 
@@ -160,15 +163,24 @@ export async function getPayments() {
   return await stmt.all();
 }
 
+export async function getPaymentsFromClient(id:number) {
+  const stmt = db.prepare(`
+      SELECT * FROM payments
+      WHERE client_id = ?
+    `);
+
+  return await stmt.all(id);
+}
+
 export async function getActiveLoansFromClient(id:number) {
   const stmt = db.prepare(
     `
       SELECT * FROM loans
       WHERE status = 1
-      AND client_id = ${id}
+      AND client_id = ?
     `
   );
-  return await stmt.all();
+  return await stmt.all(id);
 }
 
 export async function createLoan(client: client, loan: loan) {
