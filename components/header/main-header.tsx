@@ -8,7 +8,7 @@ export default function MainHeader() {
     <header className="flex justify-between items-center mb-8 font-bold">
       <div className="text-3xl">
         <Link className="flex items-center gap-2" href="/dashboard">
-          <h1>LoanApp</h1>
+          <h1>LendingApp</h1>
           <Image src={logo.src} alt="Money Icon" width={50} height={50} />
         </Link>
       </div>
