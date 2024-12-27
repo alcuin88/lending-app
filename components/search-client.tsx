@@ -45,7 +45,7 @@ export default function SearchClient({ clients }: { clients: client[] }) {
   };
 
   return (
-    <div className="relative w-80">
+    <div className="static w-80">
       {/* Input Field */}
       <input
         type="text"
@@ -59,7 +59,7 @@ export default function SearchClient({ clients }: { clients: client[] }) {
 
       {/* Dropdown Menu */}
       {dropdownVisible && (
-        <ul className="absolute z-10 w-full bg-white border border-gray-300 rounded-lg shadow-lg mt-1">
+        <ul className="absolute z-10 w-80 bg-white border border-gray-300 rounded-lg shadow-lg mt-1">
           {clients
             .filter((client) =>
               `${client.last_name.toLowerCase()}, ${client.first_name.toLowerCase()}`.includes(
