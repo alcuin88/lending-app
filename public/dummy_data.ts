@@ -22,7 +22,7 @@ export const DUMMY_PAYMENTS = [
 
 export const DUMMY_LOANS = [
   {
-    amount: 5000,
+    amount: 1500,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-12-12",
     closed_at: "",
@@ -31,7 +31,7 @@ export const DUMMY_LOANS = [
   },
   {
     client_id: 1,
-    amount: 5000,
+    amount: 3000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit. Sociosqu dapibus purus integer taciti proin porttitor quisque.",
     created_at: "2024-11-4",
     closed_at: "",
@@ -39,7 +39,7 @@ export const DUMMY_LOANS = [
   },
   {
     client_id: 1,
-    amount: 5000,
+    amount: 10000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-2-12",
     closed_at: "",
