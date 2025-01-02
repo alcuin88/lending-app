@@ -9,7 +9,6 @@ export default async function ClientList() {
   const clients = (await GetClients()) as client[];
   const clientId = await getClientIdFromSearch();
   const currentLoans = (await getActiveLoansFromClient(clientId)) as loan[];
-  // const currentPayments = (await getPaymentsFromClient(clientId)) as payment[];
 
   const clientCard = () => {
     const client = clients.find((client) => client.client_id === clientId);
@@ -39,16 +38,6 @@ export default async function ClientList() {
       return <LoanCard loan={loan} key={loan.loan_id} />;
     });
   };
-
-  // const paymentList = () => {
-  //   if (!currentPayments || currentPayments.length === 0) {
-  //     return <p>No Payments.</p>;
-  //   }
-
-  //   return currentPayments.map((payment) => (
-  //     <PaymentCard payment={payment} key={payment.payment_id} />
-  //   ));
-  // };
 
   return (
     <div className="items-start justify-center bg-white min-h-screen p-4">

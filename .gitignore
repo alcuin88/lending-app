@@ -38,8 +38,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-<<<<<<< HEAD
 loans.db
-=======
-loans.db
->>>>>>> 755b88b46933207a40ae70c21c151f716acc48b6
