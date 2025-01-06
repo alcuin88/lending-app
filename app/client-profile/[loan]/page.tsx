@@ -1,4 +1,6 @@
+import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
+import PaymentForm from "@/components/client-profile/payment-form";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -7,7 +9,6 @@ export default async function LoanDetailPage({
   params: Promise<{ loan: number }>;
 }) {
   const id = (await params).loan;
-  console.log(id);
 
   if (!id) {
     notFound();
@@ -16,7 +17,12 @@ export default async function LoanDetailPage({
   return (
     <div className="flex flex-col items-center justify-center bg-gradient-to-r from-white to-gray-50 p-6 w-full mt-4 rounded-lg shadow-lg border border-gray-200">
       <div className="w-full">
-        <LoanDetailCard loan_id={id} />
+        <BackToClientProfile />
+        <div className="flex gap-2">
+          <LoanDetailCard loan_id={id} />
+          <PaymentForm />
+        </div>
+
         <div>
           <h3 className="text-lg font-semibold text-gray-800 mt-4 mb-4">
             Payments

@@ -12,7 +12,7 @@ export default function ClientDetailCard({
   totalAmount,
 }: props) {
   return (
-    <div className="flex flex-col bg-white p-4 w-full max-w-md mt-2">
+    <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
       <p className="text-sm text-gray-500">{`ID: ${client.client_id
         .toString()
         .padStart(5, "0")}`}</p>

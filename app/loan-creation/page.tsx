@@ -1,7 +1,8 @@
 "use client";
 
 import { CreateLoan } from "@/actions/actions";
-import FormSubmit from "@/components/loan-creation/form-submit";
+import FormSubmit from "@/components/shared/form-submit";
+import { SubmitType } from "@/lib/constants";
 import { useActionState } from "react";
 
 export default function LoanCreation() {
@@ -57,7 +58,7 @@ export default function LoanCreation() {
               rows={5}
             />
           </div>
-          <FormSubmit />
+          <FormSubmit type={SubmitType.loan} />
           {state?.errors && (
             <ul className="flex flex-col items-end">
               {state.errors.map((error) => (

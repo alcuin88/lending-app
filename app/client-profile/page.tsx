@@ -43,7 +43,7 @@ export default async function ClientList() {
     <div className="items-start justify-center bg-white min-h-screen p-4">
       <SearchClient clients={clients} />
       {clientCard()}
-      <div className="flex w-full">
+      <div className="flex w-full mt-4">
         <div className="w-full justify-items-center">
           <p className="text-2xl">Active</p>
           {loanList()}
