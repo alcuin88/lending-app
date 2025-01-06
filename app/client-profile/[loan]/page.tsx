@@ -1,6 +1,7 @@
 import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
-import PaymentForm from "@/components/client-profile/payment-form";
+import MyForm from "@/components/client-profile/my-form";
+import { SubmitType } from "@/lib/constants";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -20,7 +21,7 @@ export default async function LoanDetailPage({
         <BackToClientProfile />
         <div className="flex gap-2">
           <LoanDetailCard loan_id={id} />
-          <PaymentForm />
+          <MyForm type={SubmitType.payment} />
         </div>
 
         <div>

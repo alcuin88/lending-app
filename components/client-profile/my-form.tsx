@@ -1,7 +1,7 @@
 import { SubmitType } from "@/lib/constants";
 import FormSubmit from "../shared/form-submit";
 
-export default function PaymentForm() {
+export default function MyForm({ type }: { type: SubmitType }) {
   return (
     <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
       <form className="flex flex-col">
@@ -18,7 +18,7 @@ export default function PaymentForm() {
           name="purpose"
           rows={3}
         />
-        <FormSubmit type={SubmitType.payment} />
+        <FormSubmit type={type} />
       </form>
     </div>
   );
