@@ -16,13 +16,14 @@ export const DUMMY_PAYMENTS = [
     client_id: 1,
     amount: 2000,
     loan_id: 1,
+    remarks: "Initial Payment.",
     created_at: "2024-12-13"
   }
 ]
 
 export const DUMMY_LOANS = [
   {
-    amount: 1500,
+    amount: 3500,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-12-12",
     closed_at: "",

@@ -1,5 +1,5 @@
 const sql = require("better-sqlite3");
-import { client, loan } from "@/types/types";
+import { client, loan, payment } from "@/types/types";
 import { DUMMY_LOANS, DUMMY_PAYMENTS } from "../public/dummy_data";
 const db = sql("loans.db");
 
@@ -32,6 +32,7 @@ async function initDb() {
       payment_id INTEGER PRIMARY KEY AUTOINCREMENT, 
       amount INTEGER NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      remarks TEXT,
       client_id INTEGER,
       loan_id INTEGER,
       FOREIGN KEY(client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
@@ -75,6 +76,7 @@ async function initDb() {
       null,
       @amount,
       @created_at,
+      @remarks,
       @client_id,
       @loan_id
     )
@@ -155,6 +157,15 @@ export async function getLoans() {
   return await stmt.all();
 }
 
+export async function getLoan(id:number) {
+  const stmt = db.prepare(`
+      SELECT * FROM loans
+      WHERE loan_id = ?
+    `);
+
+  return await stmt.get(id) as loan;
+}
+
 export async function getPayments() {
   const stmt = db.prepare(`
       SELECT * FROM payments
@@ -169,7 +180,7 @@ export async function getPaymentsFromClient(id:number) {
       WHERE client_id = ?
     `);
 
-  return await stmt.all(id);
+  return await stmt.all(id) as payment[];
 }
 
 export async function getActiveLoansFromClient(id:number) {

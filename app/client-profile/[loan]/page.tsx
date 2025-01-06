@@ -2,6 +2,7 @@ import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
+import { getPaymentsFromClient } from "@/lib/loans";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -10,9 +11,39 @@ export default async function LoanDetailPage({
   params: Promise<{ loan: number }>;
 }) {
   const id = (await params).loan;
+  const payments = await getPaymentsFromClient(id);
 
   if (!id) {
     notFound();
+  }
+
+  function paymentsTableRow() {
+    if (payments.length === 0) {
+      return (
+        <tr className="hover:bg-gray-50">
+          <td colSpan={4} className="text-center">
+            <p>No payments yet.</p>
+          </td>
+        </tr>
+      );
+    }
+
+    return payments.map((payment) => {
+      return (
+        <tr key={payment.payment_id} className="hover:bg-gray-50">
+          <td className="py-2 px-4 border border-gray-200 text-center">1</td>
+          <td className="py-2 px-4 border border-gray-200">
+            {payment.created_at}
+          </td>
+          <td className="py-2 px-4 border border-gray-200 ">
+            ₱ {new Intl.NumberFormat().format(payment.amount)}
+          </td>
+          <td className="py-2 px-4 border border-gray-200">
+            {payment.remarks}
+          </td>
+        </tr>
+      );
+    });
   }
 
   return (
@@ -20,7 +51,7 @@ export default async function LoanDetailPage({
       <div className="w-full">
         <BackToClientProfile />
         <div className="flex gap-2">
-          <LoanDetailCard loan_id={id} />
+          <LoanDetailCard loan_id={id} payments={payments} />
           <MyForm type={SubmitType.payment} />
         </div>
 
@@ -45,18 +76,7 @@ export default async function LoanDetailPage({
                 </th>
               </tr>
             </thead>
-            <tbody>
-              <tr className="hover:bg-gray-50">
-                <td className="py-2 px-4 border border-gray-200 text-center">
-                  1
-                </td>
-                <td className="py-2 px-4 border border-gray-200">12/27/2024</td>
-                <td className="py-2 px-4 border border-gray-200 ">₱ 5000</td>
-                <td className="py-2 px-4 border border-gray-200">
-                  Initial payment
-                </td>
-              </tr>
-            </tbody>
+            <tbody>{paymentsTableRow()}</tbody>
           </table>
         </div>
       </div>

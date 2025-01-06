@@ -1,4 +1,22 @@
-export default function LoanDetailCard({ loan_id }: { loan_id: number }) {
+import { getLoan } from "@/lib/loans";
+import { payment } from "@/types/types";
+
+interface props {
+  loan_id: number;
+  payments: payment[];
+}
+
+export default async function LoanDetailCard({ loan_id, payments }: props) {
+  const loan = await getLoan(loan_id);
+
+  function getRemainingBalance() {
+    let balance = loan.amount;
+    payments.forEach((payment) => {
+      balance -= payment.amount;
+    });
+    return balance;
+  }
+
   return (
     <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
       {/* Header Section */}
@@ -18,11 +36,11 @@ export default function LoanDetailCard({ loan_id }: { loan_id: number }) {
       <div className="grid grid-cols-2 gap-8 mb-6">
         <p className="text-sm text-gray-600">
           <span className="font-medium text-gray-800">Loan Amount:</span> ₱{" "}
-          {new Intl.NumberFormat().format(1500)}
+          {new Intl.NumberFormat().format(loan.amount)}
         </p>
         <p className="text-sm text-gray-600">
           <span className="font-medium text-gray-800">Total Payments:</span> ₱{" "}
-          {new Intl.NumberFormat().format(1000)}
+          {new Intl.NumberFormat().format(payments.length)}
         </p>
       </div>
 
@@ -31,7 +49,7 @@ export default function LoanDetailCard({ loan_id }: { loan_id: number }) {
         <div className="flex items-center space-x-2">
           <span className="text-lg font-bold">Remaining Balance:</span>
           <span className="text-2xl font-extrabold">
-            ₱ {new Intl.NumberFormat().format(1000)}
+            ₱ {new Intl.NumberFormat().format(getRemainingBalance())}
           </span>
         </div>
         <span className="text-xl">💰</span>
