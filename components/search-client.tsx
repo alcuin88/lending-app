@@ -48,6 +48,7 @@ export default function SearchClient({ clients }: { clients: client[] }) {
     <div className="static w-80">
       {/* Input Field */}
       <input
+        id="search"
         type="text"
         value={inputValue}
         onChange={handleInputChange}

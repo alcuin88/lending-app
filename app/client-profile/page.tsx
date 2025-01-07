@@ -17,7 +17,7 @@ export default async function ClientList() {
     const totalActiveLoans = currentLoans.length;
     let totalAmount = 0;
 
-    currentLoans.forEach((value) => (totalAmount += value.amount));
+    currentLoans.forEach((value) => (totalAmount += value.balance));
     if (!client) {
       return null;
     } else {
@@ -40,7 +40,7 @@ export default async function ClientList() {
     }
 
     return currentLoans.map((loan) => {
-      return <LoanCard loan={loan} key={loan.loan_id} />;
+      return <LoanCard client_id={clientId} loan={loan} key={loan.loan_id} />;
     });
   };
 

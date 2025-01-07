@@ -1,21 +1,28 @@
+import { getClient } from "@/actions/actions";
 import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
-import { getPaymentsFromClient } from "@/lib/loans";
+import { getPaymentsForLoan } from "@/lib/loans";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
   params,
 }: {
-  params: Promise<{ loan: number }>;
+  params: Promise<{
+    slug: number[];
+  }>;
 }) {
-  const id = (await params).loan;
-  const payments = await getPaymentsFromClient(id);
+  const data = (await params).slug;
 
-  if (!id) {
+  if (data.length === 0) {
     notFound();
   }
+
+  const loan_id = data[0];
+  const client_id = data[1];
+  const payments = await getPaymentsForLoan(loan_id);
+  const client = await getClient(client_id);
 
   function paymentsTableRow() {
     if (payments.length === 0) {
@@ -28,10 +35,12 @@ export default async function LoanDetailPage({
       );
     }
 
-    return payments.map((payment) => {
+    return payments.map((payment, index) => {
       return (
         <tr key={payment.payment_id} className="hover:bg-gray-50">
-          <td className="py-2 px-4 border border-gray-200 text-center">1</td>
+          <td className="py-2 px-4 border border-gray-200 text-center">
+            {++index}
+          </td>
           <td className="py-2 px-4 border border-gray-200">
             {payment.created_at}
           </td>
@@ -51,8 +60,16 @@ export default async function LoanDetailPage({
       <div className="w-full">
         <BackToClientProfile />
         <div className="flex gap-2">
-          <LoanDetailCard loan_id={id} payments={payments} />
-          <MyForm type={SubmitType.payment} />
+          <LoanDetailCard
+            loan_id={loan_id}
+            client={client}
+            payments={payments}
+          />
+          <MyForm
+            client_id={client_id}
+            loan_id={loan_id}
+            type={SubmitType.payment}
+          />
         </div>
 
         <div>

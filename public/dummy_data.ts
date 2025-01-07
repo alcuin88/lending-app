@@ -12,27 +12,29 @@ export const DUMMY_CLIENTS = [
 ]
 
 export const DUMMY_PAYMENTS = [
-  {
-    client_id: 1,
-    amount: 2000,
-    loan_id: 1,
-    remarks: "Initial Payment.",
-    created_at: "2024-12-13"
-  }
+  // {
+  //   client_id: 1,
+  //   amount: 2000,
+  //   loan_id: 1,
+  //   remarks: "Initial Payment.",
+  //   created_at: "2024-12-13"
+  // }
 ]
 
 export const DUMMY_LOANS = [
   {
+    client_id: 1,
     amount: 3500,
+    balance: 3500,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-12-12",
     closed_at: "",
-    status: 1,
-    client_id: 1,
+    status: 1
   },
   {
     client_id: 1,
     amount: 3000,
+    balance: 3000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit. Sociosqu dapibus purus integer taciti proin porttitor quisque.",
     created_at: "2024-11-4",
     closed_at: "",
@@ -41,6 +43,7 @@ export const DUMMY_LOANS = [
   {
     client_id: 1,
     amount: 10000,
+    balance: 10000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-2-12",
     closed_at: "",
@@ -49,6 +52,7 @@ export const DUMMY_LOANS = [
   {
     client_id: 2,
     amount: 2000,
+    balance: 2000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2024-12-12",
     closed_at: "",
@@ -57,6 +61,7 @@ export const DUMMY_LOANS = [
   {
     client_id: 1,
     amount: 2000,
+    balance: 2000,
     purpose: "Lorem ipsum odor amet, consectetuer adipiscing elit.",
     created_at: "2023-12-25",
     closed_at: "2024-11-25",

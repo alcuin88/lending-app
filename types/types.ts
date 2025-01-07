@@ -8,6 +8,7 @@ export interface client {
 export interface loan {
   loan_id: number,
   amount: number,
+  balance: number,
   purpose: string,
   created_at: string,
   closed_at: string,

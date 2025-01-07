@@ -27,7 +27,7 @@ export default function ClientDetailCard({
       <p className="text-sm text-gray-600 mt-2">{`Active Loans: ${totalActiveLoans}`}</p>
       <div className="flex items-center justify-between bg-blue-100 text-blue-800 p-4 rounded-lg mt-6">
         <div className="flex items-center space-x-2">
-          <span className="text-lg font-bold">Total Amount:</span>
+          <span className="text-lg font-bold">Total Balance:</span>
           <span className="text-2xl font-extrabold">
             ₱ {new Intl.NumberFormat().format(totalAmount)}
           </span>

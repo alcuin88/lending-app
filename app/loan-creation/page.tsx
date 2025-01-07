@@ -55,6 +55,7 @@ export default function LoanCreation() {
             <textarea
               className="w-full border rounded p-2"
               name="purpose"
+              id="purpose"
               rows={5}
             />
           </div>
