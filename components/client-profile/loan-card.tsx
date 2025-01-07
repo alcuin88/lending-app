@@ -3,14 +3,13 @@ import Link from "next/link";
 
 interface props {
   loan: loan;
-  client_id: number;
 }
 
-export default function LoanCard({ loan, client_id }: props) {
+export default function LoanCard({ loan }: props) {
   loan.closed_at = "2024-2-2";
   return (
     <div className="flex flex-col bg-sky-50/30 p-4 rounded-sm shadow-md w-full mt-2">
-      <Link href={`/client-profile/${loan.loan_id}/${client_id}`}>
+      <Link href={`/client-profile/${loan.loan_id}`}>
         <div className="flex items-start">
           <p className="text-sm text-gray-500 mr-2 w-1/5">{`Load ID: ${loan.loan_id
             .toString()
