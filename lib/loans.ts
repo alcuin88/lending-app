@@ -175,7 +175,7 @@ export async function getLoans() {
   return await stmt.all();
 }
 
-export async function getLoan(id:number) {
+export async function getLoan(id: number) {
   const stmt = db.prepare(`
       SELECT * FROM loans
       WHERE loan_id = ?
@@ -192,7 +192,7 @@ export async function getPayments() {
   return await stmt.all();
 }
 
-export async function getPaymentsForLoan(id:number) {
+export async function getPaymentsForLoan(id: number) {
   const stmt = db.prepare(`
       SELECT * FROM payments
       WHERE loan_id = ?
@@ -201,7 +201,7 @@ export async function getPaymentsForLoan(id:number) {
   return await stmt.all(id) as payment[];
 }
 
-export async function getActiveLoansFromClient(id:number) {
+export async function getActiveLoansFromClient(id: number) {
   const stmt = db.prepare(
     `
       SELECT * FROM loans
@@ -221,34 +221,64 @@ export async function createLoan(client: client, loan: loan) {
   );
 
   const insertResult = stmt.run(
-    client.first_name, 
-    client.last_name, 
+    client.first_name,
+    client.last_name,
     client.middle_name);
 
-    const clientId = insertResult.lastInsertRowid;
+  const clientId = insertResult.lastInsertRowid;
 
-    const loanStmt = db.prepare(
-      `
+  const loanStmt = db.prepare(
+    `
         INSERT INTO loans (amount, purpose, created_at, client_id)
         VALUES (?, ?, ?, ?)
       `
-    );
-    loanStmt.run(loan.amount, loan.purpose, loan.created_at, clientId);
-    return clientId;
-}
-
-export async function createNewLoanForClient(client_id: number, loan: loan) {
-  const stmt = db.prepare(
-    `
-      INSERT INTO loans (amount, purpose, created_at, client_id)
-      VALUES (?, ?, ?, ?)
-    `
   );
-  stmt.run(loan.amount, loan.purpose, loan.created_at, client_id);
-  return client_id;
+  loanStmt.run(loan.amount, loan.purpose, loan.created_at, clientId);
+  return clientId;
 }
 
-export async function createpayment(payment:payment) {
+export async function createNewLoanForClient(loan: loan) {
+  try {
+    const stmt = db.prepare(
+      `
+      INSERT INTO loans (
+        amount,
+        balance,
+        purpose,
+        created_at,
+        closed_at,
+        status,
+        client_id
+      )
+      VALUES (
+        @amount,
+        @balance,
+        @purpose,
+        @created_at,
+        @closed_at,
+        @status,
+        @client_id
+      )
+      `
+    );
+    stmt.run({
+      amount: loan.amount,
+      balance: loan.balance,
+      purpose: loan.purpose,
+      created_at: loan.created_at,
+      closed_at: loan.closed_at || null,
+      status: loan.status || 1,
+      client_id: loan.client_id
+    });
+
+    return loan.client_id;
+  } catch (error) {
+    console.error("Error creating new loan:", error);
+    throw new Error("Failed to create new loan.");
+  }
+}
+
+export async function createpayment(payment: payment) {
   const stmt = db.prepare(
     `
     INSERT INTO payments VALUES (

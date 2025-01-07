@@ -28,7 +28,7 @@ export default async function ClientList() {
             totalActiveLoans={totalActiveLoans}
             totalAmount={totalAmount}
           />
-          <MyForm type={SubmitType.loan} />
+          <MyForm client_id={clientId} type={SubmitType.loan} />
         </div>
       );
     }

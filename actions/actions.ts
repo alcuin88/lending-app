@@ -59,7 +59,8 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
   if(existingClient === undefined) {
     client_id = await createLoan(client, loan);
   } else {
-    client_id = await createNewLoanForClient(existingClient["client_id"], loan);
+    loan.client_id = existingClient["client_id"];
+    client_id = await createNewLoanForClient(loan);
   }
 
   const cookieStore = cookies();
@@ -95,7 +96,18 @@ export async function formControl(prevState: unknown, formData: FormData) {
   }
 
   if(type == SubmitType.loan) {
-    console.log("Loan");
+    const loan:loan = {
+      loan_id: 0,
+      amount: amount,
+      balance: amount,
+      purpose: remarks,
+      created_at: date,
+      closed_at: "",
+      status: 1,
+      client_id: client_id
+    }
+    await createNewLoanForClient(loan);
+    redirect('/client-profile');
   } else if(type == SubmitType.payment) {
     const payment:payment = {
       amount: amount,
@@ -108,8 +120,6 @@ export async function formControl(prevState: unknown, formData: FormData) {
 
     await createpayment(payment);
     redirect(`/client-profile/${loan_id}/${client_id}`);
-  } else {
-    console.log("Unknown");
   }
 }
 
