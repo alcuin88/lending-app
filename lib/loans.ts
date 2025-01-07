@@ -1,5 +1,5 @@
 const sql = require("better-sqlite3");
-import { client, loan } from "@/types/types";
+import { client, loan, payment } from "@/types/types";
 import { DUMMY_LOANS, DUMMY_PAYMENTS } from "../public/dummy_data";
 const db = sql("loans.db");
 
@@ -18,6 +18,7 @@ async function initDb() {
     CREATE TABLE IF NOT EXISTS loans (
       loan_id INTEGER PRIMARY KEY AUTOINCREMENT, 
       amount INTEGER NOT NULL,
+      balance INTEGER NOT NULL,
       purpose TEXT NOT NULL, 
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
       closed_at TEXT,
@@ -32,11 +33,28 @@ async function initDb() {
       payment_id INTEGER PRIMARY KEY AUTOINCREMENT, 
       amount INTEGER NOT NULL,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      remarks TEXT,
       client_id INTEGER,
       loan_id INTEGER,
       FOREIGN KEY(client_id) REFERENCES clients(client_id) ON DELETE CASCADE,
       FOREIGN KEY(loan_id) REFERENCES loans(loan_id) ON DELETE CASCADE
     )`
+  ).run();
+  db.prepare(
+    `
+    CREATE TRIGGER IF NOT EXISTS update_loan
+      AFTER INSERT ON payments
+      FOR EACH ROW
+      BEGIN
+        UPDATE loans
+        SET balance = (balance - NEW.amount),
+            status = CASE 
+              WHEN balance - NEW.amount = 0 THEN 0 
+              ELSE 1
+            END
+        WHERE loan_id = NEW.loan_id;
+      END;
+    `
   ).run();
 
   // Creating two dummy clients if they don't exist already
@@ -58,6 +76,7 @@ async function initDb() {
     INSERT INTO loans VALUES (
       null,
       @amount,
+      @balance,
       @purpose,
       @created_at,
       @closed_at,
@@ -75,6 +94,7 @@ async function initDb() {
       null,
       @amount,
       @created_at,
+      @remarks,
       @client_id,
       @loan_id
     )
@@ -155,6 +175,15 @@ export async function getLoans() {
   return await stmt.all();
 }
 
+export async function getLoan(id:number) {
+  const stmt = db.prepare(`
+      SELECT * FROM loans
+      WHERE loan_id = ?
+    `);
+
+  return await stmt.get(id) as loan;
+}
+
 export async function getPayments() {
   const stmt = db.prepare(`
       SELECT * FROM payments
@@ -163,13 +192,13 @@ export async function getPayments() {
   return await stmt.all();
 }
 
-export async function getPaymentsFromClient(id:number) {
+export async function getPaymentsForLoan(id:number) {
   const stmt = db.prepare(`
       SELECT * FROM payments
-      WHERE client_id = ?
+      WHERE loan_id = ?
     `);
 
-  return await stmt.all(id);
+  return await stmt.all(id) as payment[];
 }
 
 export async function getActiveLoansFromClient(id:number) {
@@ -217,4 +246,20 @@ export async function createNewLoanForClient(client_id: number, loan: loan) {
   );
   stmt.run(loan.amount, loan.purpose, loan.created_at, client_id);
   return client_id;
+}
+
+export async function createpayment(payment:payment) {
+  const stmt = db.prepare(
+    `
+    INSERT INTO payments VALUES (
+      null,
+      @amount,
+      @created_at,
+      @remarks,
+      @client_id,
+      @loan_id
+    )
+    `
+  );
+  stmt.run(payment);
 }

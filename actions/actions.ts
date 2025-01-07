@@ -1,7 +1,8 @@
 "use server"
 
-import { checkIfUserExist, createLoan, createNewLoanForClient, getClientDB, getUsers } from "@/lib/loans";
-import { client, loan } from "@/types/types";
+import { SubmitType } from "@/lib/constants";
+import { checkIfUserExist, createLoan, createNewLoanForClient, createpayment, getClientDB, getUsers } from "@/lib/loans";
+import { client, loan, payment } from "@/types/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -49,7 +50,8 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     created_at: new Date().toISOString().split("T")[0],
     closed_at: "",
     status: 1,
-    client_id: 0
+    client_id: 0,
+    balance: amount
   }
 
   let client_id = 0;
@@ -64,6 +66,51 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
   (await cookieStore).set("clientId", client_id.toString());
 
   redirect("/client-profile");
+}
+
+export async function formControl(prevState: unknown, formData: FormData) {
+  const date = formData.get("date") as string;
+  const amount = formData.get("amount") as unknown as number;
+  const remarks = formData.get("remarks") as string;
+  const type = formData.get("formType") as unknown as SubmitType;
+  const client_id = formData.get("client_id") as unknown as number;
+  const loan_id = formData.get("loan_id") as unknown as number;
+
+  const errors: string[] = [];
+
+  if (!date || date.trim().length === 0) {
+    errors.push("Date is required.");
+  }
+
+  if (!amount || amount === 0) {
+    errors.push("Amount should be non zero.");
+  }
+
+  if (!remarks || remarks.trim().length === 0) {
+    errors.push("Content is required.");
+  }
+
+  if(errors.length > 0) {
+    return { errors };
+  }
+
+  if(type == SubmitType.loan) {
+    console.log("Loan");
+  } else if(type == SubmitType.payment) {
+    const payment:payment = {
+      amount: amount,
+      created_at: date,
+      remarks: remarks,
+      client_id: client_id,
+      loan_id: loan_id,
+      payment_id: 0
+    }
+
+    await createpayment(payment);
+    redirect(`/client-profile/${loan_id}/${client_id}`);
+  } else {
+    console.log("Unknown");
+  }
 }
 
 export async function getClient(id:number) {

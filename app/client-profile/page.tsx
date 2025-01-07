@@ -1,7 +1,9 @@
 import { getClientIdFromSearch, GetClients } from "@/actions/actions";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
 import LoanCard from "@/components/client-profile/loan-card";
+import MyForm from "@/components/client-profile/my-form";
 import SearchClient from "@/components/search-client";
+import { SubmitType } from "@/lib/constants";
 import { getActiveLoansFromClient } from "@/lib/loans";
 import { client, loan } from "@/types/types";
 
@@ -15,16 +17,19 @@ export default async function ClientList() {
     const totalActiveLoans = currentLoans.length;
     let totalAmount = 0;
 
-    currentLoans.forEach((value) => (totalAmount += value.amount));
+    currentLoans.forEach((value) => (totalAmount += value.balance));
     if (!client) {
       return null;
     } else {
       return (
-        <ClientDetailCard
-          client={client}
-          totalActiveLoans={totalActiveLoans}
-          totalAmount={totalAmount}
-        />
+        <div className="flex gap-2">
+          <ClientDetailCard
+            client={client}
+            totalActiveLoans={totalActiveLoans}
+            totalAmount={totalAmount}
+          />
+          <MyForm type={SubmitType.loan} />
+        </div>
       );
     }
   };
@@ -35,7 +40,7 @@ export default async function ClientList() {
     }
 
     return currentLoans.map((loan) => {
-      return <LoanCard loan={loan} key={loan.loan_id} />;
+      return <LoanCard client_id={clientId} loan={loan} key={loan.loan_id} />;
     });
   };
 

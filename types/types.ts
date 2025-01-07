@@ -8,6 +8,7 @@ export interface client {
 export interface loan {
   loan_id: number,
   amount: number,
+  balance: number,
   purpose: string,
   created_at: string,
   closed_at: string,
@@ -19,6 +20,7 @@ export interface payment {
   payment_id: number,
   amount: number,
   created_at: string,
+  remarks: string,
   client_id: number,
   loan_id: number
 }
