@@ -119,7 +119,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
     }
 
     await createpayment(payment);
-    redirect(`/client-profile/${loan_id}/${client_id}`);
+    redirect(`/client-profile/${loan_id}`);
   }
 }
 

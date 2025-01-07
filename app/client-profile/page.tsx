@@ -40,7 +40,7 @@ export default async function ClientList() {
     }
 
     return currentLoans.map((loan) => {
-      return <LoanCard client_id={clientId} loan={loan} key={loan.loan_id} />;
+      return <LoanCard loan={loan} key={loan.loan_id} />;
     });
   };
 

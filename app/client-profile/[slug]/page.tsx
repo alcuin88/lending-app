@@ -3,26 +3,25 @@ import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
-import { getPaymentsForLoan } from "@/lib/loans";
+import { getLoan, getPaymentsForLoan } from "@/lib/loans";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
   params,
 }: {
   params: Promise<{
-    slug: number[];
+    slug: number;
   }>;
 }) {
-  const data = (await params).slug;
+  const loan_id = (await params).slug;
 
-  if (data.length === 0) {
+  if (!loan_id) {
     notFound();
   }
 
-  const loan_id = data[0];
-  const client_id = data[1];
   const payments = await getPaymentsForLoan(loan_id);
-  const client = await getClient(client_id);
+  const loan = await getLoan(loan_id);
+  const client = await getClient(loan.client_id);
 
   function paymentsTableRow() {
     if (payments.length === 0) {
@@ -66,7 +65,7 @@ export default async function LoanDetailPage({
             payments={payments}
           />
           <MyForm
-            client_id={client_id}
+            client_id={loan.client_id}
             loan_id={loan_id}
             type={SubmitType.payment}
           />
