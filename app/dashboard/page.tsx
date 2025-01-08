@@ -1,5 +1,5 @@
 import DashboardCard from "@/components/dashboard-card";
-import { getLoans } from "@/lib/loans";
+import { getLoans } from "@/lib/service";
 import { loan } from "@/types/types";
 
 export default async function Home() {

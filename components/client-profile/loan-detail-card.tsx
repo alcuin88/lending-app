@@ -1,5 +1,6 @@
-import { getLoan } from "@/lib/loans";
+import { getLoan } from "@/lib/service";
 import { client, payment } from "@/types/types";
+import { notFound } from "next/navigation";
 
 interface props {
   client: client;
@@ -13,6 +14,10 @@ export default async function LoanDetailCard({
   client,
 }: props) {
   const loan = await getLoan(loan_id);
+
+  if (!loan) {
+    notFound();
+  }
 
   const status = loan.status ? (
     <div className="bg-green-100 px-3 py-1 rounded-full text-sm font-medium">

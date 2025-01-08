@@ -3,7 +3,8 @@ import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
-import { getLoan, getPaymentsForLoan } from "@/lib/loans";
+import { getLoan, getPaymentsForLoan } from "@/lib/service";
+import { loan } from "@/types/types";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -20,7 +21,7 @@ export default async function LoanDetailPage({
   }
 
   const payments = await getPaymentsForLoan(loan_id);
-  const loan = await getLoan(loan_id);
+  const loan = (await getLoan(loan_id)) as unknown as loan;
   const client = await getClient(loan.client_id);
 
   function paymentsTableRow() {
@@ -35,13 +36,14 @@ export default async function LoanDetailPage({
     }
 
     return payments.map((payment, index) => {
+      const date = new Date(payment.created_at).toISOString();
       return (
         <tr key={payment.payment_id} className="hover:bg-gray-50">
           <td className="py-2 px-4 border border-gray-200 text-center">
             {++index}
           </td>
           <td className="py-2 px-4 border border-gray-200">
-            {payment.created_at}
+            {date.split("T")[0]}
           </td>
           <td className="py-2 px-4 border border-gray-200 ">
             ₱ {new Intl.NumberFormat().format(payment.amount)}

@@ -1,7 +1,7 @@
 "use server"
 
 import { SubmitType } from "@/lib/constants";
-import { checkIfUserExist, createLoan, createNewLoanForClient, createpayment, getClientDB, getUsers } from "@/lib/loans";
+import { checkIfUserExist, createLoan, createNewLoanForClient, createpayment, getClientDB, getUsers } from "@/lib/service";
 import { client, loan, payment } from "@/types/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -56,11 +56,12 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 
   let client_id = 0;
 
-  if(existingClient === undefined) {
+  if(existingClient === null) {
     client_id = await createLoan(client, loan);
   } else {
-    loan.client_id = existingClient["client_id"];
-    client_id = await createNewLoanForClient(loan);
+    loan.client_id = existingClient.client_id;
+
+    client_id = await createNewLoanForClient(loan) ;
   }
 
   const cookieStore = cookies();
@@ -129,7 +130,7 @@ export async function getClient(id:number) {
 }
 
 export async function GetClients() {
-  const clients =  (await getUsers()) as client[];
+  const clients =  (await getUsers()) as unknown as client[];
   
   return clients;
 }
