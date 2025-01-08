@@ -4,7 +4,7 @@ import LoanCard from "@/components/client-profile/loan-card";
 import MyForm from "@/components/client-profile/my-form";
 import SearchClient from "@/components/search-client";
 import { SubmitType } from "@/lib/constants";
-import { getActiveLoansFromClient } from "@/lib/loans";
+import { getActiveLoansFromClient } from "@/lib/service";
 import { client, loan } from "@/types/types";
 
 export default async function ClientList() {

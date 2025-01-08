@@ -1,16 +1,16 @@
 import LoanRow from "@/components/loans/loan-row";
-import { getLoanList } from "@/lib/loans";
+import { getLoanList } from "@/lib/service";
 
 interface list {
   client_id: number;
   first_name: string;
   last_name: string;
-  total_loan: number;
+  total_loans: number;
   total_payments: number;
 }
 
 export default async function LoanList() {
-  const loans = (await getLoanList()) as list[];
+  const loans = (await getLoanList()) as unknown as [];
   return (
     <div className="overflow-x-auto">
       <table className="table-auto w-full border-collapse border border-gray-300">
