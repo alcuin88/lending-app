@@ -1,4 +1,4 @@
-import { client, loan, payment } from "@/types/types";
+import { client, loan, loan_list, payment } from "@/types/types";
 import { prisma } from "./prisma";
 
 export async function getAllClients(){
@@ -23,8 +23,6 @@ export async function getClientDB(id: number) {
   } catch(err) {
     console.error("Error fetching client: ", err);
     throw new Error("Failed to fetch client.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -44,8 +42,6 @@ export async function checkIfUserExist(firstName: string, lastName: string) {
   } catch(err) {
     console.error("Error fetching client: ", err);
     throw new Error("Failed to fetch client.");
-  }  finally {
-    await prisma.$disconnect();
   }
   
 }
@@ -72,7 +68,7 @@ export async function getLoanList() {
         first_name: client.first_name,
         totalLoans,
         totalPayments,
-      };
+      } as loan_list;
     });
   } catch (error) {
     console.error("Error fetching loan list:", error);
@@ -88,8 +84,6 @@ export async function getLoans() {
   } catch(err) {
     console.error("Error fetching loans: ", err);
     throw new Error("Failed to fetch loans.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -104,8 +98,6 @@ export async function getLoan(id: number) {
   } catch(err) {
     console.error("Error fetching loan: ", err);
     throw new Error("Failed to fetch loan.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -116,8 +108,6 @@ export async function getPayments() {
   } catch(err) {
     console.error("Error fetching payments: ", err);
     throw new Error("Failed to fetch payments.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -133,8 +123,6 @@ export async function getPaymentsForLoan(id: number) {
   } catch(err) {
     console.error("Error fetching payments: ", err);
     throw new Error("Failed to fetch loan payments.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -152,8 +140,6 @@ export async function getActiveLoansFromClient(id: number) {
     console.error("Error fetching active loans for client id:", id);
     console.error("Error message :", err);
     throw new Error("Failed to fetch active loans.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -179,8 +165,6 @@ export async function createLoan(client: client, loan: loan) {
   } catch(error) {
     console.error("Error creating new loan:", error);
     throw new Error("Failed to create new loan.");
-  }  finally {
-    await prisma.$disconnect();
   }
 }
 
@@ -188,10 +172,10 @@ export async function createNewLoanForClient(loan: loan) {
   try {
     return await prisma.loan.create({
       data: {
-        amount: loan.amount,
-        balance: loan.balance,
+        amount: +loan.amount,
+        balance: +loan.balance,
         purpose: loan.purpose,
-        client_id: loan.client_id,
+        client_id: +loan.client_id,
       },
     });
   } catch (error) {
@@ -215,7 +199,5 @@ export async function createPayment(payment: payment) {
 
   } catch (err) {
     console.log("Error creating payment:", err);
-  } finally {
-    await prisma.$disconnect();
   }
 }
