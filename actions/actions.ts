@@ -1,7 +1,7 @@
 "use server"
 
 import { SubmitType } from "@/lib/constants";
-import { checkIfUserExist, createLoan, createNewLoanForClient, createpayment, getClientDB, getUsers } from "@/lib/service";
+import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClientDB, getAllClients } from "@/lib/service";
 import { client, loan, payment } from "@/types/types";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -119,7 +119,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
       payment_id: 0
     }
 
-    await createpayment(payment);
+    await createPayment(payment);
     redirect(`/client-profile/${loan_id}`);
   }
 }
@@ -130,7 +130,7 @@ export async function getClient(id:number) {
 }
 
 export async function GetClients() {
-  const clients =  (await getUsers()) as unknown as client[];
+  const clients =  (await getAllClients()) as unknown as client[];
   
   return clients;
 }
