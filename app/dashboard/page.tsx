@@ -1,13 +1,12 @@
 import DashboardCard from "@/components/dashboard-card";
 import { getLoans } from "@/lib/service";
-import { loan } from "@/types/types";
 
 export default async function Home() {
   let activeLoans = 0;
   let outstandingAmount = 0;
   let repaidAmount = 0;
 
-  const loans = (await getLoans()) as loan[];
+  const loans = await getLoans();
 
   loans.forEach((element) => {
     if (element.status == 1) {

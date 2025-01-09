@@ -1,16 +1,8 @@
 import LoanRow from "@/components/loans/loan-row";
 import { getLoanList } from "@/lib/service";
 
-interface list {
-  client_id: number;
-  first_name: string;
-  last_name: string;
-  total_loans: number;
-  total_payments: number;
-}
-
 export default async function LoanList() {
-  const loans = (await getLoanList()) as unknown as [];
+  const loans = await getLoanList();
   return (
     <div className="overflow-x-auto">
       <table className="table-auto w-full border-collapse border border-gray-300">
@@ -34,7 +26,7 @@ export default async function LoanList() {
           </tr>
         </thead>
         <tbody>
-          {loans.map((item: list, index) => {
+          {loans.map((item, index) => {
             return (
               <LoanRow data={item} index={index + 1} key={item.client_id} />
             );

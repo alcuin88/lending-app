@@ -10,7 +10,9 @@ import { client, loan } from "@/types/types";
 export default async function ClientList() {
   const clients = (await GetClients()) as client[];
   const clientId = await getClientIdFromSearch();
-  const currentLoans = (await getActiveLoansFromClient(clientId)) as loan[];
+  const currentLoans = (await getActiveLoansFromClient(
+    clientId
+  )) as unknown as loan[];
 
   const clientCard = () => {
     const client = clients.find((client) => client.client_id === clientId);
