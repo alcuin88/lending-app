@@ -1,5 +1,6 @@
-import { client, loan, loan_list, payment } from "@/types/types";
+import { client, loan, loan_list } from "@/types/types";
 import { prisma } from "./prisma";
+import { Payment } from "@prisma/client";
 
 export async function getAllClients(){
   try {
@@ -184,14 +185,14 @@ export async function createNewLoanForClient(loan: loan) {
   }
 }
 
-export async function createPayment(payment: payment) {
-  const date = new Date(payment.created_at);
+export async function createPayment(payment: Payment) {
+ 
   try {
     await prisma.payment.create({
       data: {
         amount: +payment.amount,
         remarks: payment.remarks,
-        created_at: date,
+        created_at: payment.created_at,
         client_id: +payment.client_id,
         loan_id: +payment.loan_id,
       }
