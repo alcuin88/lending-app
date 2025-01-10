@@ -5,7 +5,6 @@ import { getLoanList, getLoans } from "@/lib/service";
 export default async function Home() {
   let activeLoans = 0;
   let outstandingAmount = 0;
-  let repaidAmount = 0;
 
   const loans = await getLoans();
   const loanList = await getLoanList();
@@ -13,9 +12,7 @@ export default async function Home() {
   loans.forEach((element) => {
     if (element.status == 1) {
       activeLoans++;
-      outstandingAmount += element.amount;
-    } else {
-      repaidAmount += element.amount;
+      outstandingAmount += element.balance;
     }
   });
 
@@ -29,16 +26,6 @@ export default async function Home() {
         <DashboardCard
           title="Total Outstanding Amount"
           value={`₱ ${new Intl.NumberFormat().format(outstandingAmount)}`}
-        />
-        <DashboardCard
-          title="Total Repaid Amount"
-          value={`₱ ${new Intl.NumberFormat().format(repaidAmount)}`}
-        />
-        <DashboardCard
-          title="Remaining Balance"
-          value={`₱ ${new Intl.NumberFormat().format(
-            outstandingAmount - repaidAmount
-          )}`}
         />
       </div>
       <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">

@@ -1,11 +1,11 @@
 import { getLoan } from "@/lib/service";
-import { client, payment } from "@/types/types";
+import { Client, Payment } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 interface props {
-  client: client;
+  client: Client;
   loan_id: number;
-  payments: payment[];
+  payments: Payment[];
 }
 
 export default async function LoanDetailCard({

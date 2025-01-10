@@ -4,7 +4,7 @@ export default function LoanTable({ loans }: { loans: loan_list[] }) {
   return (
     <div className="w-full mt-4">
       <div className="bg-gray-200 text-gray-700 font-medium grid grid-cols-5 border border-gray-300 rounded-t-md px-4 py-2">
-        <div>#</div>
+        <div className="w-1">#</div>
         <div>Name</div>
         <div>Total Loan Amount</div>
         <div>Payments</div>
@@ -18,7 +18,7 @@ export default function LoanTable({ loans }: { loans: loan_list[] }) {
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
             }`}
           >
-            <div className="text-gray-600">{index + 1}</div>
+            <div className="text-gray-600 w-1">{index + 1}</div>
             <div className="text-gray-700">{`${item.last_name}, ${item.first_name}`}</div>
             <div className="text-gray-600">{item.totalLoans}</div>
             <div className="text-gray-600">{item.totalPayments}</div>
