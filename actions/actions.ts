@@ -1,8 +1,9 @@
 "use server"
 
 import { SubmitType } from "@/lib/constants";
-import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClientDB, getAllClients } from "@/lib/service";
-import { client, loan, payment } from "@/types/types";
+import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClientDB, getAllClients, getActiveLoansFromClient } from "@/lib/service";
+import { client, loan } from "@/types/types";
+import { Payment } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -60,8 +61,10 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id = await createLoan(client, loan);
   } else {
     loan.client_id = existingClient.client_id;
-
-    client_id = await createNewLoanForClient(loan) ;
+    const data = await createNewLoanForClient(loan);
+    if(data.client_id != null) {
+      client_id = data.client_id;
+    }
   }
 
   const cookieStore = cookies();
@@ -76,7 +79,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
   const remarks = formData.get("remarks") as string;
   const type = formData.get("formType") as unknown as SubmitType;
   const client_id = formData.get("client_id") as unknown as number;
-  const loan_id = formData.get("loan_id") as unknown as number;
+  const loan_id = formData.get("loan_id");
 
   const errors: string[] = [];
 
@@ -109,19 +112,67 @@ export async function formControl(prevState: unknown, formData: FormData) {
     }
     await createNewLoanForClient(loan);
     redirect('/client-profile');
-  } else if(type == SubmitType.payment) {
-    const payment:payment = {
+  } else if(type == SubmitType.payment && loan_id) {
+    const payment:Payment = {
       amount: amount,
-      created_at: date,
+      created_at: new Date(date),
       remarks: remarks,
       client_id: client_id,
-      loan_id: loan_id,
+      loan_id: +loan_id,
       payment_id: 0
     }
-
+    console.log(payment);
     await createPayment(payment);
     redirect(`/client-profile/${loan_id}`);
+  } else {
+    const payment:Payment = {
+      amount: amount,
+      created_at: new Date(date),
+      remarks: remarks,
+      client_id: client_id,
+      loan_id: 0,
+      payment_id: 0
+    }
+    generalPayment(payment);
+    redirect(`/client-profile`);
   }
+}
+
+async function generalPayment(payment: Payment) {
+  const loans = await getActiveLoansFromClient(payment.client_id);
+  loans.sort( (loan_a, loan_b) => loan_a.created_at.getTime() - loan_b.created_at.getTime() );
+  let amount = payment.amount;
+  let newPayment: Payment = {...payment};
+
+  loans.every( (loan) => {
+    
+    if(amount > loan.balance) {
+      newPayment = {...payment, loan_id: loan.loan_id, amount: loan.balance}
+    } else {
+      newPayment = {...payment, loan_id: loan.loan_id, amount: amount}
+    }
+
+    console.log(`${amount} - ${loan.balance}`);
+    amount = amount - loan.balance;
+    console.log(amount);
+    createPayment(newPayment);
+    console.log(amount > 0)
+    return amount > 0
+
+
+  })
+
+  // loans.forEach( async loan => {
+  //   const newPayment: Payment = {...payment, loan_id: loan.loan_id}
+  //   if(newPayment.amount >= loan.balance) {
+  //     await createPayment(newPayment);
+  //     payment.amount = payment.amount - loan.balance;
+  //   } else {
+  //     return;
+  //   }
+    
+  // })
+
 }
 
 export async function getClient(id:number) {

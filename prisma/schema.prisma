@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,7 +8,7 @@ datasource db {
 }
 
 model Client {
-  client_id   Int   @id @default(autoincrement())
+  client_id   Int       @id @default(autoincrement())
   first_name  String
   last_name   String
   middle_name String?
@@ -23,25 +17,25 @@ model Client {
 }
 
 model Loan {
-  loan_id     Int      @id @default(autoincrement())
-  amount      Int
-  balance     Int
-  purpose     String?
-  created_at  DateTime @default(now())
-  closed_at   DateTime?
-  status      Int      @default(1)
-  client_id   Int?
-  client      Client?  @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
-  payments    Payment[]
+  loan_id    Int       @id @default(autoincrement())
+  amount     Int
+  balance    Int
+  purpose    String?
+  created_at DateTime  @default(now())
+  closed_at  DateTime?
+  status     Int       @default(1)
+  client_id  Int
+  client     Client    @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
+  payments   Payment[]
 }
 
 model Payment {
-  payment_id  Int      @id @default(autoincrement())
-  amount      Int
-  remarks     String?
-  created_at  DateTime @default(now())
-  client_id   Int?
-  loan_id     Int?
-  client      Client?  @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
-  loan        Loan?  @relation(fields: [loan_id], references: [loan_id], onDelete: Cascade)
+  payment_id Int      @id @default(autoincrement())
+  amount     Int
+  remarks    String?
+  created_at DateTime @default(now())
+  client_id  Int
+  loan_id    Int
+  client     Client   @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
+  loan       Loan     @relation(fields: [loan_id], references: [loan_id], onDelete: Cascade)
 }

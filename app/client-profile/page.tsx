@@ -1,9 +1,8 @@
 import { getClientIdFromSearch, GetClients } from "@/actions/actions";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
+import FormToggle from "@/components/client-profile/form-toggle";
 import LoanCard from "@/components/client-profile/loan-card";
-import MyForm from "@/components/client-profile/my-form";
 import SearchClient from "@/components/search-client";
-import { SubmitType } from "@/lib/constants";
 import { getActiveLoansFromClient } from "@/lib/service";
 import { client, loan } from "@/types/types";
 
@@ -30,7 +29,7 @@ export default async function ClientList() {
             totalActiveLoans={totalActiveLoans}
             totalAmount={totalAmount}
           />
-          <MyForm client_id={clientId} type={SubmitType.loan} />
+          <FormToggle clientId={clientId} />
         </div>
       );
     }
@@ -53,7 +52,6 @@ export default async function ClientList() {
 
       <div className="flex w-full mt-4">
         <div className="w-full justify-items-center">
-          <p className="text-2xl">Active</p>
           <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">
             {loanList()}
           </div>

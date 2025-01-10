@@ -16,9 +16,9 @@ export default function MyForm({ type, client_id, loan_id }: props) {
     errors: [],
   });
 
-  const header = type === SubmitType.loan ? "Add Loan" : "Add Payment";
+  const header = type === SubmitType.loan ? "Loan Form" : "Payment Form";
   return (
-    <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
+    <div>
       <div className="flex w-full items-center justify-center mb-2 font-bold">
         <h1>{header}</h1>
       </div>
