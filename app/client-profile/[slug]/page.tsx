@@ -4,7 +4,6 @@ import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
 import { getLoan, getPaymentsForLoan } from "@/lib/service";
-import { loan } from "@/types/types";
 import { notFound } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -21,8 +20,16 @@ export default async function LoanDetailPage({
   }
 
   const payments = await getPaymentsForLoan(loan_id);
-  const loan = (await getLoan(loan_id)) as unknown as loan;
+  const loan = await getLoan(loan_id);
+
+  if (!loan) {
+    notFound();
+  }
   const client = await getClient(loan.client_id);
+
+  if (!client) {
+    notFound();
+  }
 
   function paymentsTableRow() {
     if (payments.length === 0) {

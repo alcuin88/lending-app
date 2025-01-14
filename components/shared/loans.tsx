@@ -19,7 +19,7 @@ export default function LoanTable({ loans }: { loans: loan_list[] }) {
             }`}
           >
             <div className="text-gray-600 w-1">{index + 1}</div>
-            <div className="text-gray-700">{`${item.last_name}, ${item.first_name}`}</div>
+            <div className="text-gray-700">{`${item}, ${item.first_name}`}</div>
             <div className="text-gray-600">{item.totalLoans}</div>
             <div className="text-gray-600">{item.totalPayments}</div>
             <div className="text-gray-600">

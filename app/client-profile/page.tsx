@@ -2,16 +2,16 @@ import { getClientIdFromSearch, GetClients } from "@/actions/actions";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
 import FormToggle from "@/components/client-profile/form-toggle";
 import LoanCard from "@/components/client-profile/loan-card";
+import PaymentCard from "@/components/client-profile/payment-card";
 import SearchClient from "@/components/search-client";
-import { getActiveLoansFromClient } from "@/lib/service";
-import { client, loan } from "@/types/types";
+import { getActiveLoansFromClient, getPaymentsFromClient } from "@/lib/service";
+import { Client, Loan, Payment } from "@prisma/client";
 
 export default async function ClientList() {
-  const clients = (await GetClients()) as client[];
+  const clients = (await GetClients()) as Client[];
   const clientId = await getClientIdFromSearch();
-  const currentLoans = (await getActiveLoansFromClient(
-    clientId
-  )) as unknown as loan[];
+  const currentLoans = (await getActiveLoansFromClient(clientId)) as Loan[];
+  const clientPayments = (await getPaymentsFromClient(clientId)) as Payment[];
 
   const clientCard = () => {
     const client = clients.find((client) => client.client_id === clientId);
@@ -23,14 +23,30 @@ export default async function ClientList() {
       return null;
     } else {
       return (
-        <div className="flex gap-2">
-          <ClientDetailCard
-            client={client}
-            totalActiveLoans={totalActiveLoans}
-            totalAmount={totalAmount}
-          />
-          <FormToggle clientId={clientId} />
-        </div>
+        <>
+          <div className="flex gap-2">
+            <ClientDetailCard
+              client={client}
+              totalActiveLoans={totalActiveLoans}
+              totalAmount={totalAmount}
+            />
+            <FormToggle clientId={clientId} />
+          </div>
+          <div className="grid grid-cols-2 w-full gap-4 mt-4">
+            <div className="w-full justify-items-center">
+              <p className="text-2xl">Loans</p>
+              <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">
+                {loanList()}
+              </div>
+            </div>
+            <div className="w-full justify-items-center">
+              <p className="text-2xl">Payments</p>
+              <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">
+                {paymentList()}
+              </div>
+            </div>
+          </div>
+        </>
       );
     }
   };
@@ -45,18 +61,19 @@ export default async function ClientList() {
     });
   };
 
+  const paymentList = () => {
+    if (!clientPayments || clientPayments.length === 0) {
+      return <p>No payments yes.</p>;
+    }
+    return clientPayments.map((payment) => {
+      return <PaymentCard payment={payment} key={payment.payment_id} />;
+    });
+  };
+
   return (
     <div className="items-start justify-center bg-white min-h-screen p-4">
       <SearchClient clients={clients} />
       {clientCard()}
-
-      <div className="flex w-full mt-4">
-        <div className="w-full justify-items-center">
-          <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">
-            {loanList()}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }

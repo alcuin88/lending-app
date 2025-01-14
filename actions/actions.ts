@@ -2,8 +2,7 @@
 
 import { SubmitType } from "@/lib/constants";
 import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClientDB, getAllClients, getActiveLoansFromClient } from "@/lib/service";
-import { client, loan } from "@/types/types";
-import { Payment } from "@prisma/client";
+import { Client, Loan, Payment } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -37,22 +36,24 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     return { errors };
   }
 
-  const client:client = {
+  const client:Client = {
     first_name: firstName,
     last_name: lastname,
     client_id: 0,
-    middle_name: ""
+    middle_name: "",
+    user_id: 0
   }
 
-  const loan: loan = {
+  const loan: Loan = {
     amount: amount,
     purpose: purpose,
     loan_id: 0,
-    created_at: new Date().toISOString().split("T")[0],
-    closed_at: "",
+    created_at: new Date(),
     status: 1,
     client_id: 0,
-    balance: amount
+    balance: amount,
+    user_id: 0,
+    closed_at: null
   }
 
   let client_id = 0;
@@ -100,15 +101,16 @@ export async function formControl(prevState: unknown, formData: FormData) {
   }
 
   if(type == SubmitType.loan) {
-    const loan:loan = {
+    const loan:Loan = {
       loan_id: 0,
       amount: amount,
       balance: amount,
       purpose: remarks,
-      created_at: date,
-      closed_at: "",
+      created_at: new Date(date),
+      closed_at: null,
       status: 1,
-      client_id: client_id
+      client_id: client_id,
+      user_id: 0
     }
     await createNewLoanForClient(loan);
     redirect('/client-profile');
@@ -117,29 +119,29 @@ export async function formControl(prevState: unknown, formData: FormData) {
       amount: amount,
       created_at: new Date(date),
       remarks: remarks,
-      client_id: client_id,
       loan_id: +loan_id,
-      payment_id: 0
+      payment_id: 0,
+      client_id: client_id,
     }
     console.log(payment);
     await createPayment(payment);
     redirect(`/client-profile/${loan_id}`);
   } else {
     const payment:Payment = {
+      client_id: client_id,
       amount: amount,
       created_at: new Date(date),
       remarks: remarks,
-      client_id: client_id,
       loan_id: 0,
       payment_id: 0
     }
-    generalPayment(payment);
+    generalPayment(payment, client_id);
     redirect(`/client-profile`);
   }
 }
 
-async function generalPayment(payment: Payment) {
-  const loans = await getActiveLoansFromClient(payment.client_id);
+async function generalPayment(payment: Payment, client_id: number) {
+  const loans = await getActiveLoansFromClient(client_id);
   loans.sort( (loan_a, loan_b) => loan_a.created_at.getTime() - loan_b.created_at.getTime() );
   let amount = payment.amount;
   let newPayment: Payment = {...payment};
@@ -152,36 +154,19 @@ async function generalPayment(payment: Payment) {
       newPayment = {...payment, loan_id: loan.loan_id, amount: amount}
     }
 
-    console.log(`${amount} - ${loan.balance}`);
     amount = amount - loan.balance;
-    console.log(amount);
     createPayment(newPayment);
-    console.log(amount > 0)
     return amount > 0
-
-
   })
-
-  // loans.forEach( async loan => {
-  //   const newPayment: Payment = {...payment, loan_id: loan.loan_id}
-  //   if(newPayment.amount >= loan.balance) {
-  //     await createPayment(newPayment);
-  //     payment.amount = payment.amount - loan.balance;
-  //   } else {
-  //     return;
-  //   }
-    
-  // })
-
 }
 
 export async function getClient(id:number) {
-  const client = (await getClientDB(id)) as client;
-  return client;
+  const client = (await getClientDB(id));
+  return client as Client;
 }
 
 export async function GetClients() {
-  const clients =  (await getAllClients()) as unknown as client[];
+  const clients =  (await getAllClients());
   
   return clients;
 }

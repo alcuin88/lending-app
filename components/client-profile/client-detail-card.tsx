@@ -1,7 +1,7 @@
-import { client } from "@/types/types";
+import { Client } from "@prisma/client";
 
 interface props {
-  client: client;
+  client: Client;
   totalActiveLoans: number;
   totalAmount: number;
 }

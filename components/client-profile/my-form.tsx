@@ -31,28 +31,30 @@ export default function MyForm({ type, client_id, loan_id }: props) {
         />
         <input type="hidden" id="loan_id" name="loan_id" value={loan_id} />
         <input type="hidden" id="formType" name="formType" value={type} />
-        <div className="form-control">
-          <label className="block font-bold mb-2" htmlFor="date">
-            Date
-          </label>
-          <input
-            className="w-full border rounded p-2"
-            type="date"
-            id="date"
-            name="date"
-          ></input>
-        </div>
+        <div className="grid grid-cols-2 gap-5">
+          <div className="form-control">
+            <label className="block font-bold mb-2" htmlFor="amount">
+              Amount
+            </label>
+            <input
+              className="w-full border rounded p-2"
+              type="text"
+              id="amount"
+              name="amount"
+            ></input>
+          </div>
 
-        <div className="form-control">
-          <label className="block font-bold mb-2" htmlFor="amount">
-            Amount
-          </label>
-          <input
-            className="w-full border rounded p-2"
-            type="text"
-            id="amount"
-            name="amount"
-          ></input>
+          <div className="form-control">
+            <label className="block font-bold mb-2" htmlFor="date">
+              Date
+            </label>
+            <input
+              className="w-full border rounded p-2"
+              type="date"
+              id="date"
+              name="date"
+            ></input>
+          </div>
         </div>
 
         <div className="form-control">
