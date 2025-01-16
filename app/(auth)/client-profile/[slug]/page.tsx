@@ -1,10 +1,11 @@
-import { getClient } from "@/actions/actions";
+import { fetchClient } from "@/actions/actions";
 import { verifySession } from "@/actions/dal";
 import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
-import { getLoan, getPaymentsForLoan } from "@/lib/service";
+import { prisma } from "@/lib/prisma";
+import { findRecords, getLoan } from "@/lib/service";
 import { notFound, redirect } from "next/navigation";
 
 export default async function LoanDetailPage({
@@ -26,13 +27,13 @@ export default async function LoanDetailPage({
     notFound();
   }
 
-  const payments = await getPaymentsForLoan(loan_id);
-  const loan = await getLoan(loan_id);
+  const payments = await findRecords(prisma.payment, { loan_id: +loan_id });
+  const loan = await getLoan(+loan_id);
 
   if (!loan) {
     notFound();
   }
-  const client = await getClient(loan.client_id);
+  const client = await fetchClient(loan.client_id);
 
   if (!client) {
     notFound();
@@ -75,13 +76,10 @@ export default async function LoanDetailPage({
       <div className="w-full">
         <BackToClientProfile />
         <div className="flex gap-2">
-          <LoanDetailCard
-            loan_id={loan_id}
-            client={client}
-            payments={payments}
-          />
+          <LoanDetailCard loan={loan} client={client} payments={payments} />
           <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
             <MyForm
+              userId={session.user.user_id}
               client_id={loan.client_id}
               loan_id={loan_id}
               type={SubmitType.payment}

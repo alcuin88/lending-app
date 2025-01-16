@@ -1,20 +1,17 @@
-import { getLoan } from "@/lib/service";
 import { Client, Loan, Payment } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 interface props {
   client: Client;
-  loan_id: number;
+  loan: Loan;
   payments: Payment[];
 }
 
 export default async function LoanDetailCard({
-  loan_id,
+  loan,
   payments,
   client,
 }: props) {
-  const loan = (await getLoan(loan_id)) as Loan;
-
   if (!loan) {
     notFound();
   }
@@ -35,7 +32,7 @@ export default async function LoanDetailCard({
       <div className="flex justify-between items-start mb-6">
         <div>
           <h2 className="text-lg font-bold text-gray-800">{`${client.last_name}, ${client.first_name} ${client.middle_name}`}</h2>
-          <p className="text-sm text-gray-500">{`Loan ID: ${loan_id
+          <p className="text-sm text-gray-500">{`Loan ID: ${loan.loan_id
             .toString()
             .padStart(5, "0")}`}</p>
         </div>

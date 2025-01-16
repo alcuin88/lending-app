@@ -1,7 +1,7 @@
 "use client";
 
 import {
-  getClient,
+  fetchClient,
   getClientIdFromSearch,
   setClientIdFromSearch,
 } from "@/actions/actions";
@@ -16,7 +16,7 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
     async function checkInputValue() {
       const id = await getClientIdFromSearch();
       if (id != 0) {
-        const client = await getClient(id);
+        const client = await fetchClient(id);
         setInputValue(`${client.last_name}, ${client.first_name}`);
       }
       setClientIdFromSearch(id);
