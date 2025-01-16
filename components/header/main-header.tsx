@@ -1,7 +1,9 @@
 import Link from "next/link";
 import NavLink from "./nav-link";
 import Image from "next/image";
-import logo from "@/assests/images/money-icon.png";
+import logo from "@/assets/images/money-icon.png";
+import logout_img from "@/assets/images/logout.png";
+import { logout } from "@/actions/auth-actions";
 
 export default function MainHeader() {
   return (
@@ -25,6 +27,13 @@ export default function MainHeader() {
           </li>
           <li>
             <NavLink href="/loan-creation">New Loan</NavLink>
+          </li>
+          <li>
+            <form action={logout}>
+              <button className="py-2 px-4 rounded hover:bg-[#f1f5f9]">
+                <Image src={logout_img} alt={"logout"} width={25} height={25} />
+              </button>
+            </form>
           </li>
         </ul>
       </nav>

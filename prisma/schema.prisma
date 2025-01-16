@@ -7,35 +7,56 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  user_id     Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  sessions    Session[]
+  loans       Loan[]    // One-to-many relationship with Loans
+  clients     Client[]  @relation("UserClients") // One-to-many relationship with Clients
+}
+
+model Session {
+  id          String    @id
+  expires_at  DateTime
+  user_id     Int
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+}
+
 model Client {
   client_id   Int       @id @default(autoincrement())
   first_name  String
   last_name   String
   middle_name String?
-  loans       Loan[]
   payments    Payment[]
+  loans       Loan[]    // One-to-many relationship with Loans
+  user_id     Int       // Foreign key to Users
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade, name: "UserClients")
 }
 
 model Loan {
-  loan_id    Int       @id @default(autoincrement())
-  amount     Int
-  balance    Int
-  purpose    String?
-  created_at DateTime  @default(now())
-  closed_at  DateTime?
-  status     Int       @default(1)
-  client_id  Int
-  client     Client    @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
-  payments   Payment[]
+  loan_id     Int       @id @default(autoincrement())
+  amount      Int
+  balance     Int
+  purpose     String?
+  created_at  DateTime  @default(now())
+  closed_at   DateTime?
+  status      Int       @default(1)
+  user_id     Int       // Foreign key to Users
+  user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
+  client_id   Int       // Foreign key to Clients
+  client      Client    @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
+  payments    Payment[]
 }
 
 model Payment {
-  payment_id Int      @id @default(autoincrement())
-  amount     Int
-  remarks    String?
-  created_at DateTime @default(now())
-  client_id  Int
-  loan_id    Int
-  client     Client   @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
-  loan       Loan     @relation(fields: [loan_id], references: [loan_id], onDelete: Cascade)
+  payment_id  Int       @id @default(autoincrement())
+  amount      Int
+  remarks     String?
+  created_at  DateTime  @default(now())
+  loan_id     Int       // Foreign key to Loans
+  loan        Loan      @relation(fields: [loan_id], references: [loan_id], onDelete: Cascade)
+  client_id   Int       // Foreign key to Client
+  client      Client    @relation(fields: [client_id], references: [client_id], onDelete: Cascade)
 }
+

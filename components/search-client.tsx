@@ -5,11 +5,10 @@ import {
   getClientIdFromSearch,
   setClientIdFromSearch,
 } from "@/actions/actions";
-import { client } from "@/types/types";
-
+import { Client } from "@prisma/client";
 import { useEffect, useState } from "react";
 
-export default function SearchClient({ clients }: { clients: client[] }) {
+export default function SearchClient({ clients }: { clients: Client[] }) {
   const [inputValue, setInputValue] = useState("");
   const [dropdownVisible, setDropdownVisible] = useState(false);
 
@@ -17,7 +16,7 @@ export default function SearchClient({ clients }: { clients: client[] }) {
     async function checkInputValue() {
       const id = await getClientIdFromSearch();
       if (id != 0) {
-        const client = (await getClient(id)) as client;
+        const client = await getClient(id);
         setInputValue(`${client.last_name}, ${client.first_name}`);
       }
       setClientIdFromSearch(id);
@@ -38,7 +37,7 @@ export default function SearchClient({ clients }: { clients: client[] }) {
     }
   };
 
-  const handleOptionClick = (client: client) => {
+  const handleOptionClick = (client: Client) => {
     setInputValue(`${client.last_name}, ${client.first_name}`);
     setDropdownVisible(false);
     setClientIdFromSearch(client.client_id);

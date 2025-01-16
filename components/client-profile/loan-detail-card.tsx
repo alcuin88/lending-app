@@ -1,5 +1,5 @@
 import { getLoan } from "@/lib/service";
-import { Client, Payment } from "@prisma/client";
+import { Client, Loan, Payment } from "@prisma/client";
 import { notFound } from "next/navigation";
 
 interface props {
@@ -13,7 +13,7 @@ export default async function LoanDetailCard({
   payments,
   client,
 }: props) {
-  const loan = await getLoan(loan_id);
+  const loan = (await getLoan(loan_id)) as Loan;
 
   if (!loan) {
     notFound();
@@ -54,7 +54,6 @@ export default async function LoanDetailCard({
         </p>
       </div>
 
-      {/* Remaining Balance Highlight */}
       <div className="flex items-center justify-between bg-blue-100 text-blue-800 p-4 rounded-lg mb-6">
         <div className="flex items-center space-x-2">
           <span className="text-lg font-bold">Remaining Balance:</span>
@@ -63,6 +62,19 @@ export default async function LoanDetailCard({
           </span>
         </div>
         <span className="text-xl">💰</span>
+      </div>
+
+      <div>
+        <label className="block font-bold mb-2" htmlFor="remarks">
+          Purpose
+        </label>
+        <textarea
+          className="w-full border rounded p-2"
+          id="remarks"
+          rows={2}
+          readOnly
+          value={loan.purpose || ""}
+        />
       </div>
     </div>
   );
