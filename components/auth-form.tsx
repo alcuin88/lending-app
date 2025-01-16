@@ -4,8 +4,9 @@ import { auth } from "@/actions/auth-actions";
 import Link from "next/link";
 import { useActionState } from "react";
 import logo from "@/assets/images/auth-icon.jpg";
+import { Mode } from "@/lib/constants";
 
-export default function AuthForm({ mode }: { mode: string }) {
+export default function AuthForm({ mode }: { mode: Mode }) {
   const [state, formState] = useActionState(auth.bind(null, mode), {
     errors: {},
   });
@@ -43,7 +44,7 @@ export default function AuthForm({ mode }: { mode: string }) {
           </ul>
         </div>
       )}
-      {mode === "login" ? (
+      {mode === Mode.login ? (
         <ul id="form-errors">
           {Object.keys(state.errors).map((error) => (
             <li key={error}>
@@ -54,14 +55,14 @@ export default function AuthForm({ mode }: { mode: string }) {
       ) : null}
       <p>
         <button type="submit">
-          {mode === "login" ? "Login" : "Create Account"}
+          {mode === Mode.login ? "Login" : "Create Account"}
         </button>
       </p>
       <p>
-        {mode === "login" && (
+        {mode === Mode.login && (
           <Link href="/?mode=signup">Create an account.</Link>
         )}
-        {mode === "signup" && (
+        {mode === Mode.signup && (
           <Link href="/?mode=login">Login with existing account.</Link>
         )}
       </p>

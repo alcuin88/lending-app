@@ -35,9 +35,6 @@ export async function createSession(token: string, user_id: number): Promise<Ses
 }
 
 export async function validateSessionToken(token: string): Promise<SessionValidationResult> {
-	console.log(`Auth (token): ${token}`)
-	
-	console.log(`Auth: ${token}`)
 	const result = await prisma.session.findUnique({
 		where: {
 			id: token
@@ -46,7 +43,6 @@ export async function validateSessionToken(token: string): Promise<SessionValida
 			user: true
 		}
 	});
-	console.log(`Auth: ${result}`)
 	if (result === null) {
 		return { session: null, user: null };
 	}
