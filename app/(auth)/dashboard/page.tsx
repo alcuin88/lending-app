@@ -1,7 +1,8 @@
 import { verifySession } from "@/actions/dal";
 import DashboardCard from "@/components/dashboard-card";
 import LoanTable from "@/components/shared/loans";
-import { getLoanList, getLoans } from "@/lib/service";
+import { prisma } from "@/lib/prisma";
+import { findRecords, getLoanList } from "@/lib/service";
 import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
@@ -14,7 +15,7 @@ export default async function Dashboard() {
   let activeLoans = 0;
   let outstandingAmount = 0;
   const userId = session.user.user_id;
-  const loans = await getLoans(userId);
+  const loans = await findRecords(prisma.loan, { user_id: userId });
   const loanList = await getLoanList(userId);
 
   loans.forEach((element) => {

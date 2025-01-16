@@ -5,9 +5,9 @@ import FormToggle from "@/components/client-profile/form-toggle";
 import LoanCard from "@/components/client-profile/loan-card";
 import PaymentCard from "@/components/client-profile/payment-card";
 import SearchClient from "@/components/search-client";
+import { prisma } from "@/lib/prisma";
 
-import { getActiveLoansFromClient, getPaymentsFromClient } from "@/lib/service";
-import { Loan, Payment } from "@prisma/client";
+import { findRecords } from "@/lib/service";
 import { redirect } from "next/navigation";
 
 export default async function ClientList() {
@@ -20,11 +20,13 @@ export default async function ClientList() {
   const userId = session.user.user_id;
   const clients = await GetClients(userId);
   const clientId = await getClientIdFromSearch();
-  const currentLoans = (await getActiveLoansFromClient(
-    clientId,
-    userId
-  )) as Loan[];
-  const clientPayments = (await getPaymentsFromClient(clientId)) as Payment[];
+  const currentLoans = await findRecords(prisma.loan, {
+    client_id: clientId,
+    user_id: userId,
+  });
+  const clientPayments = await findRecords(prisma.payment, {
+    client_id: +clientId,
+  });
 
   const clientCard = () => {
     const client = clients.find((client) => client.client_id === clientId);

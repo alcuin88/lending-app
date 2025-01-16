@@ -1,12 +1,14 @@
 import { prisma } from "./prisma";
 import { Client, Loan, Payment } from "@prisma/client";
 
-export async function getAllClients(userId: number){
+export async function getAllClients(userId: number): Promise<Client[]>{
+  if (typeof userId !== "number" || userId <= 0) {
+    throw new Error("Invalid user ID provided.");
+  }
+
   try {
     return await prisma.client.findMany({
-      where: {
-        user_id: userId
-      }
+      where: { user_id: userId },
     });
   } catch (error) {
     console.error("Error fetching clients:", error);
@@ -14,18 +16,26 @@ export async function getAllClients(userId: number){
   }
 }
 
-export async function getClientDB(id: number) {
-  try{
+export async function getClient(id: number): Promise<Client | null> {
+  if (typeof id !== "number") {
+    throw new Error("Invalid client ID provided.");
+  }
+
+  try {
     const client = await prisma.client.findFirst({
       where: {
-        client_id: +id
-      }
-    })
+        client_id: id,
+      },
+    });
 
-    return client;
-  } catch(err) {
-    console.error("Error fetching client: ", err);
-    throw new Error("Failed to fetch client.");
+    if (!client) {
+      console.warn(`No client found with ID: ${id}`);
+    }
+
+    return client; // This will return null if no client is found
+  } catch (err) {
+    console.error(`Error fetching client with ID ${id}:`, err);
+    throw new Error("An error occurred while fetching the client.");
   }
 }
 
@@ -81,118 +91,61 @@ export async function getLoanList(user_id: number) {
   }
 }
 
-export async function getLoans(user_id:number) {
-  try {
-    const loans = await prisma.loan.findMany({
-      where: {
-        user_id: user_id
-      }
-    });
-
-    return loans;
-  } catch(err) {
-    console.error("Error fetching loans: ", err);
-    throw new Error("Failed to fetch loans.");
-  }
-}
-
 export async function getLoan(id: number) {
-  try {
-    const loan = await prisma.loan.findFirst({
-      where: {
-        loan_id: +id
-      }
-    });
-    return loan;
-  } catch(err) {
-    console.error("Error fetching loan: ", err);
-    throw new Error("Failed to fetch loan.");
+  console.log(`id is number: ${typeof id}`)
+  console.log(`id: ${id}`)
+  if (typeof id !== "number" || id <= 0) {
+    throw new Error("Invalid loan ID provided.");
   }
+
+  const loan = await prisma.loan.findFirst({ where: { loan_id: +id } });
+
+  if (!loan) {
+    throw new Error(`Loan with ID ${id} not found.`);
+  }
+
+  return loan;
 }
 
-export async function getPayments() {
+export async function findRecords<T>(model:  { findMany: (args: { where: object }) => Promise<T[]> }, filters: object): Promise<T[]> {
   try {
-    const payments = await prisma.payment.findMany();
-    return payments;
-  } catch(err) {
-    console.error("Error fetching payments: ", err);
-    throw new Error("Failed to fetch payments.");
-  }
-}
-
-export async function getPaymentsFromClient(id: number) {
-  try {
-    const payments = await prisma.payment.findMany({
-      where: {
-        client_id: +id
-      }
-    })
-    return payments;
-  } catch(err) {
-    console.error("Error fetching payments: ", err);
-    throw new Error("Failed to fetch payments.");
-  }
-}
-
-export async function getPaymentsForLoan(id: number) {
-  try {
-    const loanPayments = await prisma.payment.findMany({
-      where: {
-        loan_id: +id
-      }
-    })
-
-    return loanPayments;
-  } catch(err) {
-    console.error("Error fetching payments: ", err);
-    throw new Error("Failed to fetch loan payments.");
-  }
-}
-
-export async function getActiveLoansFromClient(id: number, userId:number) {
-  try {
-    const clientActiveLoans = await prisma.loan.findMany({
-      where: {
-        status: 1,
-        client_id: +id,
-        user_id: +userId
-      }
-    })
-    
-    return clientActiveLoans;
-  } catch(err) {
-    console.error("Error fetching active loans for client id:", id);
-    console.error("Error message :", err);
-    throw new Error("Failed to fetch active loans.");
+    return await model.findMany({ where: filters });
+  } catch (error) {
+    console.error(`Error fetching records from ${model}:`, error);
+    throw new Error("Failed to fetch records.");
   }
 }
 
 export async function createLoan(client: Client, loan: Loan) {
 
   try{
-    console.log(`Client: ${client.user_id}`)
-    console.log(`Loan: ${loan.user_id}`)
-    const newLoan = await prisma.client.create({
-      data: {
-        user_id: +client.user_id,
-        first_name: client.first_name,
-        last_name: client.last_name,
-        middle_name: client.middle_name,
-        loans: {
-          create: {
-            user_id: +loan.user_id,
-            amount: +loan.amount,
-            balance: +loan.balance,
-            purpose: loan.purpose,
-          }
-        }
-      }
-    })
+    const result = await prisma.$transaction(async (prisma) => {
+      const newClient = await prisma.client.create({
+        data: {
+          user_id: client.user_id,
+          first_name: client.first_name,
+          last_name: client.last_name,
+          middle_name: client.middle_name,
+        },
+      });
 
-    return newLoan.client_id;
+      const newLoan = await prisma.loan.create({
+        data: {
+          user_id: loan.user_id,
+          client_id: newClient.client_id,
+          amount: loan.amount,
+          balance: loan.balance,
+          purpose: loan.purpose,
+        },
+      });
+
+      return { newClient, newLoan };
+    });
+
+    return result;
   } catch(error) {
-    console.error("Error creating new loan:", error);
-    throw new Error("Failed to create new loan.");
+    console.error("Error creating loan with client:", error);
+    throw new Error("Failed to create loan with client.");
   }
 }
 
