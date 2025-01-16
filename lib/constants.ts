@@ -5,3 +5,8 @@ export enum SubmitType {
   payment,
   loan,
 }
+
+export enum Mode {
+  login,
+  signup
+}
