@@ -1,7 +1,8 @@
 "use server"
 
 import { SubmitType } from "@/lib/constants";
-import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClientDB, getAllClients, getActiveLoansFromClient } from "@/lib/service";
+import { prisma } from "@/lib/prisma";
+import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClient, getAllClients, findRecords } from "@/lib/service";
 import { Client, Loan, Payment } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -60,7 +61,8 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
   let client_id = 0;
 
   if(existingClient === null) {
-    client_id = await createLoan(client, loan);
+    const data = (await createLoan(client, loan));
+    client_id = data.newClient.client_id;
   } else {
     loan.client_id = existingClient.client_id;
     const data = await createNewLoanForClient(loan);
@@ -143,7 +145,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
 }
 
 async function generalPayment(payment: Payment, client_id: number, userId: number) {
-  const loans = await getActiveLoansFromClient(client_id, userId);
+  const loans = await findRecords(prisma.loan ,{client_id:client_id, user_id: userId});
   loans.sort( (loan_a, loan_b) => loan_a.created_at.getTime() - loan_b.created_at.getTime() );
   let amount = payment.amount;
   let newPayment: Payment = {...payment};
@@ -162,9 +164,18 @@ async function generalPayment(payment: Payment, client_id: number, userId: numbe
   })
 }
 
-export async function getClient(id:number) {
-  const client = (await getClientDB(id));
-  return client as Client;
+export async function fetchClient(id:number): Promise<Client> {
+  if (typeof id !== "number" || id <= 0) {
+    throw new Error("Invalid client ID provided.");
+  }
+
+  const client = await getClient(id);
+
+  if (!client) {
+    throw new Error(`Client with ID ${id} not found.`);
+  }
+
+  return client;
 }
 
 export async function GetClients(userId:number) {
