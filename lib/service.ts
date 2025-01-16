@@ -12,7 +12,6 @@ export async function getAllClients(){
 }
 
 export async function getClientDB(id: number) {
-
   try{
     const client = await prisma.client.findFirst({
       where: {

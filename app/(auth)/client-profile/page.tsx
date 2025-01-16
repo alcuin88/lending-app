@@ -1,13 +1,22 @@
 import { getClientIdFromSearch, GetClients } from "@/actions/actions";
+import { verifySession } from "@/actions/dal";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
 import FormToggle from "@/components/client-profile/form-toggle";
 import LoanCard from "@/components/client-profile/loan-card";
 import PaymentCard from "@/components/client-profile/payment-card";
 import SearchClient from "@/components/search-client";
+
 import { getActiveLoansFromClient, getPaymentsFromClient } from "@/lib/service";
 import { Client, Loan, Payment } from "@prisma/client";
+import { redirect } from "next/navigation";
 
 export default async function ClientList() {
+  const session = await verifySession();
+
+  if (session.session === null) {
+    return redirect("/");
+  }
+
   const clients = (await GetClients()) as Client[];
   const clientId = await getClientIdFromSearch();
   const currentLoans = (await getActiveLoansFromClient(clientId)) as Loan[];

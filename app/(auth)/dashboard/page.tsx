@@ -1,8 +1,16 @@
+import { verifySession } from "@/actions/dal";
 import DashboardCard from "@/components/dashboard-card";
 import LoanTable from "@/components/shared/loans";
 import { getLoanList, getLoans } from "@/lib/service";
+import { redirect } from "next/navigation";
 
-export default async function Home() {
+export default async function Dashboard() {
+  const session = await verifySession();
+  console.log(`Dashboard: ${session.user}`);
+  if (session.session === null) {
+    return redirect("/");
+  }
+
   let activeLoans = 0;
   let outstandingAmount = 0;
 

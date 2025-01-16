@@ -11,14 +11,14 @@ model User {
   user_id     Int       @id @default(autoincrement())
   email       String    @unique
   password    String
-  sessions    Sessions[]
+  sessions    Session[]
   loans       Loan[]    // One-to-many relationship with Loans
   clients     Client[]  @relation("UserClients") // One-to-many relationship with Clients
 }
 
-model Sessions {
+model Session {
   id          String    @id
-  expires_at  Int
+  expires_at  DateTime
   user_id     Int
   user        User     @relation(fields: [user_id], references: [user_id], onDelete: Cascade)
 }

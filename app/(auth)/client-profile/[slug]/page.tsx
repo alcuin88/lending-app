@@ -1,10 +1,11 @@
 import { getClient } from "@/actions/actions";
+import { verifySession } from "@/actions/dal";
 import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
 import { getLoan, getPaymentsForLoan } from "@/lib/service";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export default async function LoanDetailPage({
   params,
@@ -13,6 +14,12 @@ export default async function LoanDetailPage({
     slug: number;
   }>;
 }) {
+  const session = await verifySession();
+
+  if (session.session === null) {
+    return redirect("/");
+  }
+
   const loan_id = (await params).slug;
 
   if (!loan_id) {
