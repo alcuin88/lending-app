@@ -1,6 +1,7 @@
 "use server";
 
 import { createSession, invalidateSession, generateSessionToken } from "@/lib/auth";
+import { Mode } from "@/lib/constants";
 import { SignupFormSchema } from "@/lib/definitions";
 import { hashUserPassword, verifyPassword } from "@/lib/hash";
 import { createUser, getUserByEmail } from "@/lib/user";
@@ -81,8 +82,8 @@ export async function login(prevState: unknown, formData: FormData) {
   redirect("/dashboard")
 }
 
-export async function auth(mode: string, prevState: unknown, formData: FormData) {
-  if(mode === "login") {
+export async function auth(mode: Mode, prevState: unknown, formData: FormData) {
+  if(mode === Mode.login) {
     return login(prevState, formData);
   }
   return SignUp(prevState, formData);
