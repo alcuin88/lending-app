@@ -7,7 +7,7 @@ import PaymentCard from "@/components/client-profile/payment-card";
 import SearchClient from "@/components/search-client";
 
 import { getActiveLoansFromClient, getPaymentsFromClient } from "@/lib/service";
-import { Client, Loan, Payment } from "@prisma/client";
+import { Loan, Payment } from "@prisma/client";
 import { redirect } from "next/navigation";
 
 export default async function ClientList() {
@@ -17,9 +17,13 @@ export default async function ClientList() {
     return redirect("/");
   }
 
-  const clients = (await GetClients()) as Client[];
+  const userId = session.user.user_id;
+  const clients = await GetClients(userId);
   const clientId = await getClientIdFromSearch();
-  const currentLoans = (await getActiveLoansFromClient(clientId)) as Loan[];
+  const currentLoans = (await getActiveLoansFromClient(
+    clientId,
+    userId
+  )) as Loan[];
   const clientPayments = (await getPaymentsFromClient(clientId)) as Payment[];
 
   const clientCard = () => {
@@ -39,7 +43,7 @@ export default async function ClientList() {
               totalActiveLoans={totalActiveLoans}
               totalAmount={totalAmount}
             />
-            <FormToggle clientId={clientId} />
+            <FormToggle clientId={clientId} userId={userId} />
           </div>
           <div className="grid grid-cols-2 w-full gap-4 mt-4">
             <div className="w-full justify-items-center">

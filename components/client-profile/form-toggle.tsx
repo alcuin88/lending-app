@@ -4,7 +4,13 @@ import { SubmitType } from "@/lib/constants";
 import MyForm from "./my-form";
 import { useState } from "react";
 
-export default function FormToggle({ clientId }: { clientId: number }) {
+export default function FormToggle({
+  clientId,
+  userId,
+}: {
+  clientId: number;
+  userId: number;
+}) {
   const [isLoan, setIsLoan] = useState(false);
   return (
     <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
@@ -21,6 +27,7 @@ export default function FormToggle({ clientId }: { clientId: number }) {
         <span className="ml-2 text-gray-700">{isLoan ? "Pay" : "Loan"}</span>
       </div>
       <MyForm
+        userId={userId}
         client_id={clientId}
         type={isLoan ? SubmitType.payment : SubmitType.loan}
       />

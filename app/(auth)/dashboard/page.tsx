@@ -6,16 +6,16 @@ import { redirect } from "next/navigation";
 
 export default async function Dashboard() {
   const session = await verifySession();
-  console.log(`Dashboard: ${session.user}`);
+
   if (session.session === null) {
     return redirect("/");
   }
 
   let activeLoans = 0;
   let outstandingAmount = 0;
-
-  const loans = await getLoans();
-  const loanList = await getLoanList();
+  const userId = session.user.user_id;
+  const loans = await getLoans(userId);
+  const loanList = await getLoanList(userId);
 
   loans.forEach((element) => {
     if (element.status == 1) {

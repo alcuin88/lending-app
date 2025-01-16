@@ -1,4 +1,10 @@
-import { loan_list } from "@/types/types";
+interface loan_list {
+  client_id: number;
+  last_name: string;
+  first_name: string;
+  totalLoans: number;
+  totalPayments: number;
+}
 
 export default function LoanTable({ loans }: { loans: loan_list[] }) {
   return (
@@ -19,7 +25,7 @@ export default function LoanTable({ loans }: { loans: loan_list[] }) {
             }`}
           >
             <div className="text-gray-600 w-1">{index + 1}</div>
-            <div className="text-gray-700">{`${item}, ${item.first_name}`}</div>
+            <div className="text-gray-700">{`${item.last_name}, ${item.first_name}`}</div>
             <div className="text-gray-600">{item.totalLoans}</div>
             <div className="text-gray-600">{item.totalPayments}</div>
             <div className="text-gray-600">

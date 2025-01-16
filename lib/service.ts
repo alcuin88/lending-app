@@ -1,10 +1,13 @@
-import { loan_list } from "@/types/types";
 import { prisma } from "./prisma";
 import { Client, Loan, Payment } from "@prisma/client";
 
-export async function getAllClients(){
+export async function getAllClients(userId: number){
   try {
-    return await prisma.client.findMany();
+    return await prisma.client.findMany({
+      where: {
+        user_id: userId
+      }
+    });
   } catch (error) {
     console.error("Error fetching clients:", error);
     throw new Error("Failed to fetch clients.");
@@ -46,9 +49,12 @@ export async function checkIfUserExist(firstName: string, lastName: string) {
   
 }
 
-export async function getLoanList() {
+export async function getLoanList(user_id: number) {
   try {
     const clients = await prisma.client.findMany({
+      where: {
+        user_id: user_id
+      },
       include: {
         loans: true,
       },
@@ -67,7 +73,7 @@ export async function getLoanList() {
         first_name: client.first_name,
         totalLoans,
         totalPayments,
-      } as loan_list;
+      };
     });
   } catch (error) {
     console.error("Error fetching loan list:", error);
@@ -75,9 +81,13 @@ export async function getLoanList() {
   }
 }
 
-export async function getLoans() {
+export async function getLoans(user_id:number) {
   try {
-    const loans = await prisma.loan.findMany();
+    const loans = await prisma.loan.findMany({
+      where: {
+        user_id: user_id
+      }
+    });
 
     return loans;
   } catch(err) {
@@ -139,12 +149,13 @@ export async function getPaymentsForLoan(id: number) {
   }
 }
 
-export async function getActiveLoansFromClient(id: number) {
+export async function getActiveLoansFromClient(id: number, userId:number) {
   try {
     const clientActiveLoans = await prisma.loan.findMany({
       where: {
         status: 1,
         client_id: +id,
+        user_id: +userId
       }
     })
     
@@ -159,15 +170,17 @@ export async function getActiveLoansFromClient(id: number) {
 export async function createLoan(client: Client, loan: Loan) {
 
   try{
+    console.log(`Client: ${client.user_id}`)
+    console.log(`Loan: ${loan.user_id}`)
     const newLoan = await prisma.client.create({
       data: {
-        user_id: 0,
+        user_id: +client.user_id,
         first_name: client.first_name,
         last_name: client.last_name,
         middle_name: client.middle_name,
         loans: {
           create: {
-            user_id: 0,
+            user_id: +loan.user_id,
             amount: +loan.amount,
             balance: +loan.balance,
             purpose: loan.purpose,
@@ -187,7 +200,7 @@ export async function createNewLoanForClient(loan: Loan) {
   try {
     return await prisma.loan.create({
       data: {
-        user_id: 0,
+        user_id: +loan.user_id,
         amount: +loan.amount,
         balance: +loan.balance,
         purpose: loan.purpose,

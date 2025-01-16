@@ -7,11 +7,12 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
-
+  
   const firstName = formData.get("first-name") as string;
   const lastname = formData.get("last-name") as string;
   const amount = formData.get("amount") as unknown as number;
   const purpose = formData.get("purpose") as string;
+  const userId = formData.get("userId");
 
   const existingClient = await checkIfUserExist(firstName, lastname);
   const errors: string[] = [];
@@ -41,7 +42,7 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     last_name: lastname,
     client_id: 0,
     middle_name: "",
-    user_id: 0
+    user_id: userId ? +userId : 0
   }
 
   const loan: Loan = {
@@ -52,7 +53,7 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     status: 1,
     client_id: 0,
     balance: amount,
-    user_id: 0,
+    user_id: userId ? +userId : 0,
     closed_at: null
   }
 
@@ -81,6 +82,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
   const type = formData.get("formType") as unknown as SubmitType;
   const client_id = formData.get("client_id") as unknown as number;
   const loan_id = formData.get("loan_id");
+  const userId = formData.get("userId") || 0;
 
   const errors: string[] = [];
 
@@ -110,7 +112,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
       closed_at: null,
       status: 1,
       client_id: client_id,
-      user_id: 0
+      user_id: +userId
     }
     await createNewLoanForClient(loan);
     redirect('/client-profile');
@@ -135,13 +137,13 @@ export async function formControl(prevState: unknown, formData: FormData) {
       loan_id: 0,
       payment_id: 0
     }
-    generalPayment(payment, client_id);
+    generalPayment(payment, client_id, +userId);
     redirect(`/client-profile`);
   }
 }
 
-async function generalPayment(payment: Payment, client_id: number) {
-  const loans = await getActiveLoansFromClient(client_id);
+async function generalPayment(payment: Payment, client_id: number, userId: number) {
+  const loans = await getActiveLoansFromClient(client_id, userId);
   loans.sort( (loan_a, loan_b) => loan_a.created_at.getTime() - loan_b.created_at.getTime() );
   let amount = payment.amount;
   let newPayment: Payment = {...payment};
@@ -165,9 +167,8 @@ export async function getClient(id:number) {
   return client as Client;
 }
 
-export async function GetClients() {
-  const clients =  (await getAllClients());
-  
+export async function GetClients(userId:number) {
+  const clients =  await getAllClients(userId);
   return clients;
 }
 

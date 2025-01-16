@@ -28,7 +28,7 @@ export async function SignUp(prevState: unknown, formData: FormData) {
     const user = await createUser(email, hashedPassword) as User;
     const token = generateSessionToken();
     await createSession(token, user?.user_id);
-    redirect("/training");
+    redirect("/dashboard");
   } catch (error) {
     if (isSqliteConstraintUniqueError(error)) {
       return {

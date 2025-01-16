@@ -10,6 +10,6 @@ export default async function LoanList() {
     return redirect("/");
   }
 
-  const loans = await getLoanList();
+  const loans = await getLoanList(session.user.user_id);
   return <LoanTable loans={loans} />;
 }
