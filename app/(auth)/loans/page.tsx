@@ -1,15 +1,29 @@
+import { fetchClients } from "@/actions/actions";
 import { verifySession } from "@/actions/dal";
 import LoanTable from "@/components/shared/loans";
-import { getLoanList } from "@/lib/service";
-import { redirect } from "next/navigation";
+import { Client, Loan, LoanList } from "@/lib/interface";
 
-export default async function LoanList() {
-  const session = await verifySession();
+export default async function Loans() {
+  const token = await verifySession();
+  const data = await fetchClients(token);
+  const loanList: LoanList[] = [];
+  data.forEach((client: Client) => {
+    let totalPayments = 0;
+    let totalLoans = 0;
+    client.loans.forEach((loan: Loan) => {
+      if (loan.status) {
+        totalPayments += loan.amount - loan.balance;
+        totalLoans += loan.amount;
+      }
+    });
+    loanList.push({
+      client_id: client.client_id,
+      last_name: client.last_name,
+      first_name: client.first_name,
+      totalLoans,
+      totalPayments,
+    });
+  });
 
-  if (session.session === null) {
-    return redirect("/");
-  }
-
-  const loans = await getLoanList(session.user.user_id);
-  return <LoanTable loans={loans} />;
+  return <LoanTable loans={loanList} />;
 }

@@ -1,4 +1,4 @@
-import { Client } from "@prisma/client";
+import { Client } from "@/lib/interface";
 
 interface props {
   client: Client;
@@ -15,7 +15,7 @@ export default function ClientDetailCard({
     <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-lg font-bold text-gray-800">{`${client.last_name}, ${client.first_name} ${client.middle_name}`}</h2>
+          <h2 className="text-lg font-bold text-gray-800">{`${client.last_name}, ${client.first_name}`}</h2>
           <p className="text-sm text-gray-500">{`Client ID: ${client.client_id
             .toString()
             .padStart(5, "0")}`}</p>

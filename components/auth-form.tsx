@@ -3,8 +3,9 @@
 import { auth } from "@/actions/auth-actions";
 import Link from "next/link";
 import { useActionState } from "react";
-import logo from "@/assets/images/auth-icon.jpg";
+import logo from "@/public/images/auth-icon.jpg";
 import { Mode } from "@/lib/constants";
+import Image from "next/image";
 
 export default function AuthForm({ mode }: { mode: Mode }) {
   const [state, formState] = useActionState(auth.bind(null, mode), {
@@ -13,7 +14,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   return (
     <form action={formState} id="auth-form">
       <div>
-        <img src={logo.src} alt="A lock icon" />
+        <Image src={logo} alt="A lock icon" />
       </div>
       <p>
         <label htmlFor="email">Email</label>
@@ -46,11 +47,12 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       )}
       {mode === Mode.login ? (
         <ul id="form-errors">
-          {Object.keys(state.errors).map((error) => (
-            <li key={error}>
-              {state.errors[error as keyof typeof state.errors]}
-            </li>
-          ))}
+          {state?.errors &&
+            Object.keys(state.errors).map((error) => (
+              <li key={error}>
+                {state.errors[error as keyof typeof state.errors]}
+              </li>
+            ))}
         </ul>
       ) : null}
       <p>
@@ -60,10 +62,12 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       </p>
       <p>
         {mode === Mode.login && (
-          <Link href="/?mode=signup">Create an account.</Link>
+          <Link href={`/?mode=${Mode.signup}`}>Create an account.</Link>
         )}
         {mode === Mode.signup && (
-          <Link href="/?mode=login">Login with existing account.</Link>
+          <Link href={`/?mode=${Mode.login}`}>
+            Login with existing account.
+          </Link>
         )}
       </p>
     </form>

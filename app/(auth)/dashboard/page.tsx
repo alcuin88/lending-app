@@ -1,27 +1,40 @@
+import { fetchClients } from "@/actions/actions";
 import { verifySession } from "@/actions/dal";
+
 import LoanTable from "@/components/shared/loans";
-import { prisma } from "@/lib/prisma";
-import { findRecords, getLoanList } from "@/lib/service";
-import { redirect } from "next/navigation";
+import { Client, Loan, LoanList } from "@/lib/interface";
+import { notFound } from "next/navigation";
 
 export default async function Dashboard() {
-  const session = await verifySession();
+  const token = await verifySession();
 
-  if (session.session === null) {
-    return redirect("/");
-  }
-
+  const data: Client[] = await fetchClients(token);
   let activeLoans = 0;
   let outstandingAmount = 0;
-  const userId = session.user.user_id;
-  const loans = await findRecords(prisma.loan, { user_id: userId });
-  const loanList = await getLoanList(userId);
+  const loanList: LoanList[] = [];
 
-  loans.forEach((element) => {
-    if (element.status == 1) {
-      activeLoans++;
-      outstandingAmount += element.balance;
-    }
+  if (data.length === 0) {
+    return notFound();
+  }
+
+  data.forEach((client: Client) => {
+    let totalPayments = 0;
+    let totalLoans = 0;
+    client.loans.forEach((loan: Loan) => {
+      if (loan.status) {
+        totalPayments += loan.amount - loan.balance;
+        totalLoans += loan.amount;
+        activeLoans++;
+        outstandingAmount += loan.balance;
+      }
+    });
+    loanList.push({
+      client_id: client.client_id,
+      last_name: client.last_name,
+      first_name: client.first_name,
+      totalLoans,
+      totalPayments,
+    });
   });
 
   return (

@@ -1,8 +1,8 @@
 import Link from "next/link";
 import NavLink from "./nav-link";
 import Image from "next/image";
-import logo from "@/assets/images/money-icon.png";
-import logout_img from "@/assets/images/logout.png";
+import logo from "@/public/images/money-icon.png";
+import logout_img from "@/public/images/logout.png";
 import { logout } from "@/actions/auth-actions";
 
 export default function MainHeader() {

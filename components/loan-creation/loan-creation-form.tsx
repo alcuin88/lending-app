@@ -5,13 +5,12 @@ import { SubmitType } from "@/lib/constants";
 import { CreateLoan } from "@/actions/actions";
 import { useActionState } from "react";
 
-export default function LoanCreationForm({ userId }: { userId: number }) {
+export default function LoanCreationForm() {
   const [state, formAction] = useActionState(CreateLoan, {
     errors: [],
   });
   return (
     <form action={formAction}>
-      <input type="hidden" id="userId" name="userId" value={userId} />
       <div className="form-control mb-4">
         <label className="block font-bold mb-2" htmlFor="first-name">
           First Name

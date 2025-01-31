@@ -1,4 +1,4 @@
-import { Payment } from "@prisma/client";
+import { Payment } from "@/lib/interface";
 
 interface props {
   payment: Payment;
