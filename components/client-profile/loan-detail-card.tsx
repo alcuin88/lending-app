@@ -1,4 +1,4 @@
-import { Client, Loan, Payment } from "@prisma/client";
+import { Client, Loan, Payment } from "@/lib/interface";
 import { notFound } from "next/navigation";
 
 interface props {
@@ -31,7 +31,7 @@ export default async function LoanDetailCard({
       {/* Header Section */}
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-lg font-bold text-gray-800">{`${client.last_name}, ${client.first_name} ${client.middle_name}`}</h2>
+          <h2 className="text-lg font-bold text-gray-800">{`${client.last_name}, ${client.first_name}`}</h2>
           <p className="text-sm text-gray-500">{`Loan ID: ${loan.loan_id
             .toString()
             .padStart(5, "0")}`}</p>

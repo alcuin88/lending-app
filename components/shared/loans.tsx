@@ -1,12 +1,6 @@
-interface loan_list {
-  client_id: number;
-  last_name: string;
-  first_name: string;
-  totalLoans: number;
-  totalPayments: number;
-}
+import { LoanList } from "@/lib/interface";
 
-export default function LoanTable({ loans }: { loans: loan_list[] }) {
+export default function LoanTable({ loans }: { loans: LoanList[] }) {
   return (
     <div className="w-full mt-4">
       <div className="bg-gray-200 text-gray-700 font-medium grid grid-cols-5 border border-gray-300 rounded-t-md px-4 py-2">

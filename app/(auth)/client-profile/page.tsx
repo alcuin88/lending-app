@@ -1,42 +1,50 @@
-import { getClientIdFromSearch, GetClients } from "@/actions/actions";
+import { fetchClients, getClientIdFromSearch } from "@/actions/actions";
 import { verifySession } from "@/actions/dal";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
 import FormToggle from "@/components/client-profile/form-toggle";
 import LoanCard from "@/components/client-profile/loan-card";
 import PaymentCard from "@/components/client-profile/payment-card";
 import SearchClient from "@/components/search-client";
-import { prisma } from "@/lib/prisma";
-
-import { findRecords } from "@/lib/service";
-import { redirect } from "next/navigation";
+import { Loan, Payment } from "@/lib/interface";
 
 export default async function ClientList() {
-  const session = await verifySession();
+  const token = await verifySession();
 
-  if (session.session === null) {
-    return redirect("/");
-  }
-
-  const userId = session.user.user_id;
-  const clients = await GetClients(userId);
+  const clients = await fetchClients(token);
   const clientId = await getClientIdFromSearch();
-  const currentLoans = await findRecords(prisma.loan, {
-    client_id: clientId,
-    user_id: userId,
-  });
-  const clientPayments = await findRecords(prisma.payment, {
-    client_id: +clientId,
-  });
+  const currentLoans: Loan[] = [];
+  const clientPayments: Payment[] = [];
 
   const clientCard = () => {
     const client = clients.find((client) => client.client_id === clientId);
-    const totalActiveLoans = currentLoans.length;
-    let totalAmount = 0;
+    const userId = clients[0].user_id;
 
-    currentLoans.forEach((value) => (totalAmount += value.balance));
+    clients.forEach((client) => {
+      if (client.client_id === clientId) {
+        client.loans.forEach((loan) => {
+          if (loan.user_id === userId) {
+            currentLoans.push(loan);
+          }
+        });
+      }
+    });
+
+    clients.forEach((client) => {
+      if (client.client_id === clientId) {
+        client.payments.forEach((payment) => {
+          clientPayments.push(payment);
+        });
+      }
+    });
+
     if (!client) {
       return null;
     } else {
+      const totalActiveLoans = currentLoans.length;
+      const totalAmount = currentLoans.reduce(
+        (total, loan) => total + loan.balance,
+        0
+      );
       return (
         <>
           <div className="flex gap-2">

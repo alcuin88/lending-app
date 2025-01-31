@@ -1,11 +1,10 @@
 "use client";
 
 import {
-  fetchClient,
   getClientIdFromSearch,
   setClientIdFromSearch,
 } from "@/actions/actions";
-import { Client } from "@prisma/client";
+import { Client } from "@/lib/interface";
 import { useEffect, useState } from "react";
 
 export default function SearchClient({ clients }: { clients: Client[] }) {
@@ -16,7 +15,11 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
     async function checkInputValue() {
       const id = await getClientIdFromSearch();
       if (id != 0) {
-        const client = await fetchClient(id);
+        const client = clients.find((client) => client.client_id === id);
+        if (!client) {
+          setInputValue("");
+          return;
+        }
         setInputValue(`${client.last_name}, ${client.first_name}`);
       }
       setClientIdFromSearch(id);

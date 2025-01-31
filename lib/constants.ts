@@ -7,6 +7,6 @@ export enum SubmitType {
 }
 
 export enum Mode {
-  login,
-  signup
+  login = "login",
+  signup = "signup"
 }

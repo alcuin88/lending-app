@@ -3,7 +3,7 @@
 import { SubmitType } from "@/lib/constants";
 import FormSubmit from "../shared/form-submit";
 import { useActionState } from "react";
-import { formControl } from "@/actions/actions";
+import { formControl } from "@/actions/client-loan-payment.actions";
 
 interface props {
   type: SubmitType;

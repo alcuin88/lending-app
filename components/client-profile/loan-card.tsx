@@ -1,4 +1,4 @@
-import { Loan } from "@prisma/client";
+import { Loan } from "@/lib/interface";
 import Link from "next/link";
 
 interface props {

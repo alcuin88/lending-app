@@ -1,22 +1,19 @@
-"use server"
+"use server";
 
-import { SubmitType } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
-import { checkIfUserExist, createLoan, createNewLoanForClient, createPayment, getClient, getAllClients, findRecords } from "@/lib/service";
-import { Client, Loan, Payment } from "@prisma/client";
+import { Client } from "@/lib/interface";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
-  
+  const loanURL = "http://localhost:3333/loan/new";
+  const token = (await cookies()).get("access_token")?.value as string;
   const firstName = formData.get("first-name") as string;
   const lastname = formData.get("last-name") as string;
   const amount = formData.get("amount") as unknown as number;
   const purpose = formData.get("purpose") as string;
-  const userId = formData.get("userId");
-
-  const existingClient = await checkIfUserExist(firstName, lastname);
   const errors: string[] = [];
+
+  let client_id = 0;
 
   if (!firstName || firstName.trim().length === 0) {
     errors.push("First name is required.");
@@ -34,41 +31,39 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     errors.push("Content is required.");
   }
 
-  if(errors.length > 0) {
+  if (errors.length > 0) {
     return { errors };
   }
 
-  const client:Client = {
+  const client = await getClientByName(firstName, lastname, token);
+
+  if (!client) {
+    client_id = await createClient(firstName, lastname, token);
+  }
+
+  const loan = {
+    amount: amount.toString(),
+    balance: amount.toString(),
+    purpose,
     first_name: firstName,
     last_name: lastname,
-    client_id: 0,
-    middle_name: "",
-    user_id: userId ? +userId : 0
-  }
+    client_id: client_id.toString(),
+  };
 
-  const loan: Loan = {
-    amount: amount,
-    purpose: purpose,
-    loan_id: 0,
-    created_at: new Date(),
-    status: 1,
-    client_id: 0,
-    balance: amount,
-    user_id: userId ? +userId : 0,
-    closed_at: null
-  }
-
-  let client_id = 0;
-
-  if(existingClient === null) {
-    const data = (await createLoan(client, loan));
-    client_id = data.newClient.client_id;
-  } else {
-    loan.client_id = existingClient.client_id;
-    const data = await createNewLoanForClient(loan);
-    if(data.client_id != null) {
-      client_id = data.client_id;
+  try {
+    const response = await fetch(loanURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams(loan).toString(),
+    });
+    if (!response.ok) {
+      throw new Error(response.status.toString());
     }
+  } catch (error) {
+    throw new Error(`Error posting loan: ${error}`);
   }
 
   const cookieStore = cookies();
@@ -77,110 +72,59 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
   redirect("/client-profile");
 }
 
-export async function formControl(prevState: unknown, formData: FormData) {
-  const date = formData.get("date") as string;
-  const amount = formData.get("amount") as unknown as number;
-  const remarks = formData.get("remarks") as string;
-  const type = formData.get("formType") as unknown as SubmitType;
-  const client_id = formData.get("client_id") as unknown as number;
-  const loan_id = formData.get("loan_id");
-  const userId = formData.get("userId") || 0;
-
-  const errors: string[] = [];
-
-  if (!date || date.trim().length === 0) {
-    errors.push("Date is required.");
-  }
-
-  if (!amount || amount === 0) {
-    errors.push("Amount should be non zero.");
-  }
-
-  if (!remarks || remarks.trim().length === 0) {
-    errors.push("Content is required.");
-  }
-
-  if(errors.length > 0) {
-    return { errors };
-  }
-
-  if(type == SubmitType.loan) {
-    const loan:Loan = {
-      loan_id: 0,
-      amount: amount,
-      balance: amount,
-      purpose: remarks,
-      created_at: new Date(date),
-      closed_at: null,
-      status: 1,
-      client_id: client_id,
-      user_id: +userId
+async function createClient(
+  first_name: string,
+  last_name: string,
+  token: string
+) {
+  const clientURL = "http://localhost:3333/client/create";
+  try {
+    const response = await fetch(clientURL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        first_name: first_name,
+        last_name: last_name,
+        token,
+      }).toString(),
+    });
+    if (!response.ok) {
+      throw new Error(response.status.toString());
     }
-    await createNewLoanForClient(loan);
-    redirect('/client-profile');
-  } else if(type == SubmitType.payment && loan_id) {
-    const payment:Payment = {
-      amount: amount,
-      created_at: new Date(date),
-      remarks: remarks,
-      loan_id: +loan_id,
-      payment_id: 0,
-      client_id: client_id,
-    }
-    console.log(payment);
-    await createPayment(payment);
-    redirect(`/client-profile/${loan_id}`);
-  } else {
-    const payment:Payment = {
-      client_id: client_id,
-      amount: amount,
-      created_at: new Date(date),
-      remarks: remarks,
-      loan_id: 0,
-      payment_id: 0
-    }
-    generalPayment(payment, client_id, +userId);
-    redirect(`/client-profile`);
+    return await response.json();
+  } catch {
+    throw new Error("Failed to create new client.");
   }
 }
 
-async function generalPayment(payment: Payment, client_id: number, userId: number) {
-  const loans = await findRecords(prisma.loan ,{client_id:client_id, user_id: userId});
-  loans.sort( (loan_a, loan_b) => loan_a.created_at.getTime() - loan_b.created_at.getTime() );
-  let amount = payment.amount;
-  let newPayment: Payment = {...payment};
-
-  loans.every( (loan) => {
-    
-    if(amount > loan.balance) {
-      newPayment = {...payment, loan_id: loan.loan_id, amount: loan.balance}
-    } else {
-      newPayment = {...payment, loan_id: loan.loan_id, amount: amount}
+export async function getClientByName(
+  first_name: string,
+  last_name: string,
+  token: string
+): Promise<Client> {
+  const clientURL = "http://localhost:3333/loan/client";
+  try {
+    const response = await fetch(clientURL, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        first_name: first_name,
+        last_name: last_name,
+      }).toString(),
+    });
+    if (!response.ok) {
+      return notFound();
     }
-
-    amount = amount - loan.balance;
-    createPayment(newPayment);
-    return amount > 0
-  })
-}
-
-export async function fetchClient(id:number): Promise<Client> {
-  if (typeof id !== "number" || id <= 0) {
-    throw new Error("Invalid client ID provided.");
+    return (await response.json()) as Client;
+  } catch (error) {
+    throw new Error(`Error posting loan: ${error}`);
   }
-
-  const client = await getClient(id);
-
-  if (!client) {
-    throw new Error(`Client with ID ${id} not found.`);
-  }
-
-  return client;
-}
-
-export async function GetClients(userId:number) {
-  const clients =  await getAllClients(userId);
-  return clients;
 }
 
 export async function setClientIdFromSearch(id: number) {
@@ -191,6 +135,28 @@ export async function setClientIdFromSearch(id: number) {
 export async function getClientIdFromSearch() {
   const cookieStore = cookies();
   const value = (await cookieStore).get("clientId")?.value || 0;
-  
+
   return +value;
+}
+
+export async function fetchClients(token: string): Promise<Client[]> {
+  const url = "http://localhost:3333/client/all";
+  const client: Client[] = [];
+  try {
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+    if (!response.ok) {
+      return redirect("/");
+    }
+    const fetchedClient = (await response.json()) as Client[];
+    client.push(...fetchedClient);
+  } catch (error) {
+    console.log("Error creating user:", error);
+  }
+  return client;
 }

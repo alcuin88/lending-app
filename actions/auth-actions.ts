@@ -1,11 +1,8 @@
 "use server";
 
-import { createSession, invalidateSession, generateSessionToken } from "@/lib/auth";
+import { createSession } from "@/lib/auth";
 import { Mode } from "@/lib/constants";
 import { SignupFormSchema } from "@/lib/definitions";
-import { hashUserPassword, verifyPassword } from "@/lib/hash";
-import { createUser, getUserByEmail } from "@/lib/user";
-import { User } from "@prisma/client";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -15,21 +12,19 @@ export async function SignUp(prevState: unknown, formData: FormData) {
 
   const validateFields = SignupFormSchema.safeParse({
     email: email,
-    password: password
+    password: password,
   });
 
-  if(!validateFields.success) {
+  if (!validateFields.success) {
     return {
       errors: validateFields.error.flatten().fieldErrors,
-    }
+    };
   }
 
-  const hashedPassword = hashUserPassword(password);
   try {
-    const user = await createUser(email, hashedPassword) as User;
-    const token = generateSessionToken();
-    await createSession(token, user?.user_id);
-    redirect("/dashboard");
+    const url = "http://localhost:3333/auth/signup";
+    await userApi(email, password, url);
+    redirect("/login");
   } catch (error) {
     if (isSqliteConstraintUniqueError(error)) {
       return {
@@ -57,40 +52,63 @@ export async function login(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const existingUser =
-    await getUserByEmail(email) as User;
- 
-  if (!existingUser) {
+  const validateFields = SignupFormSchema.safeParse({
+    email: email,
+    password: password,
+  });
+
+  if (!validateFields.success) {
     return {
-      errors: {
-        login: "Could not authenticate user, please check your credentials.",
-      },
+      errors: validateFields.error.flatten().fieldErrors,
     };
   }
 
-  const isValidPassword = verifyPassword(existingUser.password, password);
-
-  if (!isValidPassword) {
-    return {
-      errors: {
-        login: "Could not authenticate user, please check your credentials.",
-      },
-    };
+  try {
+    const url = "http://localhost:3333/auth/login";
+    const response = await userApi(email, password, url);
+    if (!response?.ok) {
+      return {
+        error: `Error: ${response?.status}`,
+      };
+    }
+    const data = await response.json();
+    console.log(data);
+    await createSession(data.access_token);
+    redirect("/dashboard");
+  } catch (error) {
+    if (isSqliteConstraintUniqueError(error)) {
+      return {
+        errors: {
+          email: "Email already exists.",
+        },
+      };
+    }
+    throw error;
   }
-  const token = await generateSessionToken() ;
-  await createSession(token, existingUser.user_id);
-  redirect("/dashboard")
 }
 
 export async function auth(mode: Mode, prevState: unknown, formData: FormData) {
-  if(mode === Mode.login) {
+  if (mode === Mode.login) {
     return login(prevState, formData);
   }
   return SignUp(prevState, formData);
 }
 
 export async function logout() {
-  const token = (await cookies()).get('session')?.value as string
-  await invalidateSession(token);
+  (await cookies()).delete("access_token");
   redirect("/");
+}
+
+export async function userApi(email: string, password: string, url: string) {
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: new URLSearchParams({ email, password }).toString(),
+    });
+  } catch (error) {
+    console.log("Error creating user:", error);
+  }
 }
