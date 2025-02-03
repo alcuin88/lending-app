@@ -71,9 +71,10 @@ export async function login(prevState: unknown, formData: FormData) {
         error: `Error: ${response?.status}`,
       };
     }
-    const data = await response.json();
+    const data: { access_token: string; expires_in: string } =
+      await response.json();
     console.log(data);
-    await createSession(data.access_token);
+    await createSession(data);
     redirect("/dashboard");
   } catch (error) {
     if (isSqliteConstraintUniqueError(error)) {
