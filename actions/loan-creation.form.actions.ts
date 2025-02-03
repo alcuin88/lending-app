@@ -6,7 +6,7 @@ import { notFound, redirect } from "next/navigation";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
   const loanURL = "http://localhost:3333/loan/new";
-  const token = (await cookies()).get("access_token")?.value as string;
+  const token = formData.get("token") as string;
   const firstName = formData.get("first-name") as string;
   const lastname = formData.get("last-name") as string;
   const amount = formData.get("amount") as unknown as number;
@@ -39,16 +39,18 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 
   if (!client) {
     client_id = await createClient(firstName, lastname, token);
+  } else {
+    client_id = client.client_id;
   }
 
   const loan = {
     amount: amount.toString(),
     balance: amount.toString(),
     purpose,
-    first_name: firstName,
-    last_name: lastname,
     client_id: client_id.toString(),
   };
+
+  console.log(loan);
 
   try {
     const response = await fetch(loanURL, {
@@ -60,10 +62,11 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
       body: new URLSearchParams(loan).toString(),
     });
     if (!response.ok) {
-      throw new Error(response.status.toString());
+      throw new Error(`Error: ${response.statusText}`);
     }
-  } catch (error) {
-    throw new Error(`Error posting loan: ${error}`);
+  } catch (err) {
+    console.log(err);
+    throw new Error("Error posting loan");
   }
 
   const cookieStore = cookies();
@@ -79,7 +82,7 @@ async function createClient(
 ) {
   const clientURL = "http://localhost:3333/client/create";
   try {
-    const response = await fetch(clientURL, {
+    return await fetch(clientURL, {
       method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
@@ -90,11 +93,12 @@ async function createClient(
         last_name: last_name,
         token,
       }).toString(),
+    }).then((res) => {
+      if (!res.ok) {
+        throw new Error(res.status.toString());
+      }
+      return res.json();
     });
-    if (!response.ok) {
-      throw new Error(response.status.toString());
-    }
-    return await response.json();
   } catch {
     throw new Error("Failed to create new client.");
   }
@@ -105,10 +109,10 @@ export async function getClientByName(
   last_name: string,
   token: string
 ): Promise<Client> {
-  const clientURL = "http://localhost:3333/loan/client";
+  const clientURL = "http://localhost:3333/client";
   try {
     const response = await fetch(clientURL, {
-      method: "GET",
+      method: "POST",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${token}`,

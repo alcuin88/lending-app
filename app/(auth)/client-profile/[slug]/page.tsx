@@ -1,12 +1,15 @@
-import { fetchClient } from "@/actions/actions";
 import { verifySession } from "@/actions/dal";
 import BackToClientProfile from "@/components/client-profile/back-link";
 import LoanDetailCard from "@/components/client-profile/loan-detail-card";
 import MyForm from "@/components/client-profile/my-form";
 import { SubmitType } from "@/lib/constants";
-import { prisma } from "@/lib/prisma";
-import { findRecords, getLoan } from "@/lib/service";
-import { notFound, redirect } from "next/navigation";
+
+import { notFound } from "next/navigation";
+import {
+  getClientById,
+  getLoanById,
+  getPaymentById,
+} from "@/actions/client-loan-payment.actions";
 
 export default async function LoanDetailPage({
   params,
@@ -15,11 +18,7 @@ export default async function LoanDetailPage({
     slug: number;
   }>;
 }) {
-  const session = await verifySession();
-
-  if (session.session === null) {
-    return redirect("/");
-  }
+  const token = await verifySession();
 
   const loan_id = (await params).slug;
 
@@ -27,13 +26,13 @@ export default async function LoanDetailPage({
     notFound();
   }
 
-  const payments = await findRecords(prisma.payment, { loan_id: +loan_id });
-  const loan = await getLoan(+loan_id);
+  const payments = await getPaymentById(loan_id, token);
+  const loan = await getLoanById(loan_id, token);
 
   if (!loan) {
     notFound();
   }
-  const client = await fetchClient(loan.client_id);
+  const client = await getClientById(loan.client_id, token);
 
   if (!client) {
     notFound();
@@ -79,7 +78,6 @@ export default async function LoanDetailPage({
           <LoanDetailCard loan={loan} client={client} payments={payments} />
           <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
             <MyForm
-              userId={session.user.user_id}
               client_id={loan.client_id}
               loan_id={loan_id}
               type={SubmitType.payment}

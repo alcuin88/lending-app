@@ -3,7 +3,7 @@
 import { SubmitType } from "@/lib/constants";
 import { Payment } from "@/lib/interface";
 import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export async function formControl(prevState: unknown, formData: FormData) {
   const token = (await cookies()).get("access_token")?.value as string;
@@ -85,7 +85,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
 
 async function postPayment(payment: Payment, token: string) {
   const url = "http://localhost:3333/payment/new";
-  console.log(payment);
+
   try {
     const response = await fetch(url, {
       method: "POST",
@@ -106,5 +106,80 @@ async function postPayment(payment: Payment, token: string) {
     }
   } catch {
     throw new Error("Failed to create new client.");
+  }
+}
+
+export async function getLoanById(loan_id: number, token: string) {
+  const url = "http://localhost:3333/loan/id";
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        loan_id: loan_id.toString(),
+      }).toString(),
+    }).then((res) => {
+      if (!res.ok) {
+        throw notFound();
+      }
+      return res.json();
+    });
+  } catch {
+    throw new Error(`Failed to fetch Loan with loan_id: ${loan_id}`);
+  }
+}
+
+export async function getPaymentById(
+  loan_id: number,
+  token: string
+): Promise<Payment[]> {
+  const url = "http://localhost:3333/payment/id";
+
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        loan_id: loan_id.toString(),
+      }).toString(),
+    });
+    if (!res.ok) {
+      throw new Error(res.status.toString());
+    }
+    return await res.json();
+  } catch (err) {
+    console.log(err);
+    throw new Error("Failed to fetch Payment.");
+  }
+}
+
+export async function getClientById(client_id: number, token: string) {
+  const url = "http://localhost:3333/client/id";
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: new URLSearchParams({
+        client_id: client_id.toString(),
+      }).toString(),
+    }).then((res) => {
+      if (!res.ok) {
+        throw notFound();
+      }
+      return res.json();
+    });
+  } catch {
+    throw new Error(`Failed to fetch Client with client_id: ${client_id}`);
   }
 }
