@@ -2,15 +2,16 @@
 
 import FormSubmit from "@/components/shared/form-submit";
 import { SubmitType } from "@/lib/constants";
-import { CreateLoan } from "@/actions/actions";
+import { CreateLoan } from "@/actions/loan-creation.form.actions";
 import { useActionState } from "react";
 
-export default function LoanCreationForm() {
+export default function LoanCreationForm({ token }: { token: string }) {
   const [state, formAction] = useActionState(CreateLoan, {
     errors: [],
   });
   return (
     <form action={formAction}>
+      <input type="hidden" value={token} id="token" name="token" />
       <div className="form-control mb-4">
         <label className="block font-bold mb-2" htmlFor="first-name">
           First Name

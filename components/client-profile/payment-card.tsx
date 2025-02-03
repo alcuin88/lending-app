@@ -5,7 +5,7 @@ interface props {
 }
 
 export default function PaymentCard({ payment }: props) {
-  const date = payment.created_at.toISOString();
+  const date = payment.created_at.toString();
 
   return (
     <div className="flex flex-col bg-sky-50/30 p-4 rounded-sm shadow-md w-full mt-2">

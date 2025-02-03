@@ -7,12 +7,11 @@ import { formControl } from "@/actions/client-loan-payment.actions";
 
 interface props {
   type: SubmitType;
-  userId: number;
   client_id?: number;
   loan_id?: number;
 }
 
-export default function MyForm({ type, client_id, loan_id, userId }: props) {
+export default function MyForm({ type, client_id, loan_id }: props) {
   const [state, formState] = useActionState(formControl, {
     errors: [],
   });
@@ -24,7 +23,6 @@ export default function MyForm({ type, client_id, loan_id, userId }: props) {
         <h1>{header}</h1>
       </div>
       <form action={formState} className="flex flex-col">
-        <input type="hidden" id="userId" name="userId" value={userId} />
         <input
           type="hidden"
           id="client_id"

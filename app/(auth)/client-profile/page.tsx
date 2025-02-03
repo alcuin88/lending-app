@@ -1,4 +1,7 @@
-import { fetchClients, getClientIdFromSearch } from "@/actions/actions";
+import {
+  fetchClients,
+  getClientIdFromSearch,
+} from "@/actions/loan-creation.form.actions";
 import { verifySession } from "@/actions/dal";
 import ClientDetailCard from "@/components/client-profile/client-detail-card";
 import FormToggle from "@/components/client-profile/form-toggle";
@@ -55,7 +58,7 @@ export default async function ClientList() {
             />
             <FormToggle clientId={clientId} userId={userId} />
           </div>
-          <div className="grid grid-cols-2 w-full gap-4 mt-4">
+          <div className="grid grid-cols-2 w-full gap-8 mt-4">
             <div className="w-full justify-items-center">
               <p className="text-2xl">Loans</p>
               <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">

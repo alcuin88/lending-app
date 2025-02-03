@@ -1,4 +1,4 @@
-import { fetchClients } from "@/actions/actions";
+import { fetchClients } from "@/actions/loan-creation.form.actions";
 import { verifySession } from "@/actions/dal";
 
 import LoanTable from "@/components/shared/loans";
