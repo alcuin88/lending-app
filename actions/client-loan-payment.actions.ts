@@ -2,8 +2,9 @@
 
 import { SubmitType } from "@/lib/constants";
 import { Payment } from "@/lib/interface";
+import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export async function formControl(prevState: unknown, formData: FormData) {
   const token = (await cookies()).get("access_token")?.value as string;
@@ -42,16 +43,18 @@ export async function formControl(prevState: unknown, formData: FormData) {
 
     try {
       const url = "http://localhost:3333/loan/new";
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-        body: new URLSearchParams(loan).toString(),
-      });
-      if (!response.ok) {
-        redirect("/client-profile");
+      const response = await axios.post(
+        url,
+        new URLSearchParams(loan).toString(),
+        {
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      if (response.status !== HttpStatusCode.Ok) {
+        throw new Error(`Error: ${response.statusText}`);
       }
     } catch (error) {
       throw new Error(`Error posting loan: ${error}`);
@@ -87,23 +90,26 @@ async function postPayment(payment: Payment, token: string) {
   const url = "http://localhost:3333/payment/new";
 
   try {
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const response = await axios.post(
+      url,
+      new URLSearchParams({
         amount: payment.amount.toString(),
         remarks: payment.remarks,
         loan_id: payment.loan_id.toString(),
         client_id: payment.client_id.toString(),
         created_at: payment.created_at.toISOString(),
       }).toString(),
-    });
-    if (!response.ok) {
-      throw new Error(response.status.toString());
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.status !== HttpStatusCode.Created) {
+      throw new Error(`Error: ${response.statusText}`);
     }
+    return response.data;
   } catch {
     throw new Error("Failed to create new client.");
   }
@@ -113,21 +119,22 @@ export async function getLoanById(loan_id: number, token: string) {
   const url = "http://localhost:3333/loan/id";
 
   try {
-    return await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const response = await axios.post(
+      url,
+      new URLSearchParams({
         loan_id: loan_id.toString(),
       }).toString(),
-    }).then((res) => {
-      if (!res.ok) {
-        throw notFound();
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
       }
-      return res.json();
-    });
+    );
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+    return response.data;
   } catch {
     throw new Error(`Failed to fetch Loan with loan_id: ${loan_id}`);
   }
@@ -140,20 +147,22 @@ export async function getPaymentById(
   const url = "http://localhost:3333/payment/id";
 
   try {
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const response = await axios.post(
+      url,
+      new URLSearchParams({
         loan_id: loan_id.toString(),
       }).toString(),
-    });
-    if (!res.ok) {
-      throw new Error(res.status.toString());
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`Error: ${response.statusText}`);
     }
-    return await res.json();
+    return response.data;
   } catch (err) {
     console.log(err);
     throw new Error("Failed to fetch Payment.");
@@ -164,21 +173,24 @@ export async function getClientById(client_id: number, token: string) {
   const url = "http://localhost:3333/client/id";
 
   try {
-    return await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const response = await axios.post(
+      url,
+      new URLSearchParams({
         client_id: client_id.toString(),
       }).toString(),
-    }).then((res) => {
-      if (!res.ok) {
-        throw notFound();
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
       }
-      return res.json();
-    });
+    );
+
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+
+    return response.data;
   } catch {
     throw new Error(`Failed to fetch Client with client_id: ${client_id}`);
   }
