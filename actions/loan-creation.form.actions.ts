@@ -1,8 +1,9 @@
 "use server";
 
 import { Client } from "@/lib/interface";
+import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
   const loanURL = "http://localhost:3333/loan/new";
@@ -43,6 +44,8 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id = client.client_id;
   }
 
+  console.log(client_id);
+
   const loan = {
     amount: amount.toString(),
     balance: amount.toString(),
@@ -50,23 +53,24 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id: client_id.toString(),
   };
 
-  console.log(loan);
-
   try {
-    const response = await fetch(loanURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams(loan).toString(),
-    });
-    if (!response.ok) {
-      throw new Error(`Error: ${response.statusText}`);
+    const res = await axios.post(
+      loanURL,
+      new URLSearchParams(loan).toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (res.status !== HttpStatusCode.Ok) {
+      throw new Error(`Error: ${res.statusText}`);
     }
-  } catch (err) {
-    console.log(err);
-    throw new Error("Error posting loan");
+  } catch (error) {
+    console.error("Request failed:", error);
+    throw new Error(`Error: ${error}`);
   }
 
   const cookieStore = cookies();
@@ -82,23 +86,22 @@ async function createClient(
 ) {
   const clientURL = "http://localhost:3333/client/create";
   try {
-    return await fetch(clientURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const res = await axios.post(
+      clientURL,
+      new URLSearchParams({
         first_name: first_name,
         last_name: last_name,
         token,
       }).toString(),
-    }).then((res) => {
-      if (!res.ok) {
-        throw new Error(res.status.toString());
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
       }
-      return res.json();
-    });
+    );
+
+    return res.data.client_id;
   } catch {
     throw new Error("Failed to create new client.");
   }
@@ -108,24 +111,27 @@ export async function getClientByName(
   first_name: string,
   last_name: string,
   token: string
-): Promise<Client> {
+) {
   const clientURL = "http://localhost:3333/client";
+
   try {
-    const response = await fetch(clientURL, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: new URLSearchParams({
+    const response = await axios.post(
+      clientURL,
+      new URLSearchParams({
         first_name: first_name,
         last_name: last_name,
       }).toString(),
-    });
-    if (!response.ok) {
-      return notFound();
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    if (!response.status) {
+      throw new Error(response.status.toString());
     }
-    return (await response.json()) as Client;
+    return response.data;
   } catch (error) {
     throw new Error(`Error posting loan: ${error}`);
   }
@@ -147,17 +153,16 @@ export async function fetchClients(token: string): Promise<Client[]> {
   const url = "http://localhost:3333/client/all";
   const client: Client[] = [];
   try {
-    const response = await fetch(url, {
-      method: "GET",
+    const response = await axios.get(url, {
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${token}`,
       },
     });
-    if (!response.ok) {
+    if (response.status !== HttpStatusCode.Ok) {
       return redirect("/");
     }
-    const fetchedClient = (await response.json()) as Client[];
+    const fetchedClient = response.data as Client[];
     client.push(...fetchedClient);
   } catch (error) {
     console.log("Error creating user:", error);

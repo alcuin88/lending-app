@@ -3,6 +3,7 @@
 import { createSession } from "@/lib/auth";
 import { Mode } from "@/lib/constants";
 import { SignupFormSchema } from "@/lib/definitions";
+import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -24,7 +25,7 @@ export async function SignUp(prevState: unknown, formData: FormData) {
   try {
     const url = "http://localhost:3333/auth/signup";
     await userApi(email, password, url);
-    redirect("/login");
+    redirect("/?mode=login");
   } catch (error) {
     if (isSqliteConstraintUniqueError(error)) {
       return {
@@ -65,15 +66,12 @@ export async function login(prevState: unknown, formData: FormData) {
 
   try {
     const url = "http://localhost:3333/auth/login";
-    const response = await userApi(email, password, url);
-    if (!response?.ok) {
-      return {
-        error: `Error: ${response?.status}`,
-      };
-    }
-    const data: { access_token: string; expires_in: string } =
-      await response.json();
-    console.log(data);
+    const data: { access_token: string; expires_in: string } = await userApi(
+      email,
+      password,
+      url
+    );
+
     await createSession(data);
     redirect("/dashboard");
   } catch (error) {
@@ -102,13 +100,19 @@ export async function logout() {
 
 export async function userApi(email: string, password: string, url: string) {
   try {
-    return await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: new URLSearchParams({ email, password }).toString(),
-    });
+    const response = await axios.post(
+      url,
+      new URLSearchParams({ email, password }).toString(),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
+    if (response.status !== HttpStatusCode.Ok) {
+      throw new Error(`Error: ${response.statusText}`);
+    }
+    return response.data;
   } catch (error) {
     console.log("Error creating user:", error);
   }

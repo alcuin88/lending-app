@@ -3,18 +3,18 @@ import { verifySession } from "@/actions/dal";
 
 import LoanTable from "@/components/shared/loans";
 import { Client, Loan, LoanList } from "@/lib/interface";
-import { notFound } from "next/navigation";
 
 export default async function Dashboard() {
   const token = await verifySession();
 
   const data: Client[] = await fetchClients(token);
+
   let activeLoans = 0;
   let outstandingAmount = 0;
   const loanList: LoanList[] = [];
 
   if (data.length === 0) {
-    return notFound();
+    return <p>No records found!</p>;
   }
 
   data.forEach((client: Client) => {

@@ -19,6 +19,9 @@ export default async function ClientList() {
   const clientPayments: Payment[] = [];
 
   const clientCard = () => {
+    if (clients.length === 0) {
+      return <p>No Clients for this user.</p>;
+    }
     const client = clients.find((client) => client.client_id === clientId);
     const userId = clients[0].user_id;
 
