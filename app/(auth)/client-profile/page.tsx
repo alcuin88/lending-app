@@ -23,14 +23,11 @@ export default async function ClientList() {
       return <p>No Clients for this user.</p>;
     }
     const client = clients.find((client) => client.client_id === clientId);
-    const userId = clients[0].user_id;
 
     clients.forEach((client) => {
       if (client.client_id === clientId) {
         client.loans.forEach((loan) => {
-          if (loan.user_id === userId) {
-            currentLoans.push(loan);
-          }
+          currentLoans.push(loan);
         });
       }
     });
@@ -59,7 +56,7 @@ export default async function ClientList() {
               totalActiveLoans={totalActiveLoans}
               totalAmount={totalAmount}
             />
-            <FormToggle clientId={clientId} userId={userId} />
+            <FormToggle clientId={clientId} />
           </div>
           <div className="grid grid-cols-2 w-full gap-8 mt-4">
             <div className="w-full justify-items-center">
