@@ -81,7 +81,16 @@ export default async function ClientList() {
     if (!currentLoans || currentLoans.length === 0) {
       return <p>No active loans.</p>;
     }
+    currentLoans.sort((a, b) => {
+      if (a.status < b.status) {
+        return -1;
+      }
+      if (a.status > b.status) {
+        return 1;
+      }
 
+      return 0;
+    });
     return currentLoans.map((loan) => {
       return <LoanCard loan={loan} key={loan.loan_id} />;
     });
