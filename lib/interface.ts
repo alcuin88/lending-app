@@ -14,7 +14,7 @@ export interface Loan {
   purpose: string;
   created_at: Date;
   closed_at?: Date;
-  status: boolean;
+  status: string;
   user_id: number;
   client_id: number;
 }

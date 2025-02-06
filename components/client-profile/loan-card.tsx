@@ -14,7 +14,9 @@ export default function LoanCard({ loan }: props) {
         <div className="flex items-start">
           <div className="flex flex-col text-gray-500 text-xs mb-2 text-right ml-auto">
             <p>{`Date: ${date.split("T")[0]}`}</p>
-            {!loan.status ? <p>{`Paid: ${loan.closed_at}`}</p> : null}
+            {loan.status === "Paid" ? (
+              <p>{`Paid: ${loan.closed_at?.toString().split("T")[0]}`}</p>
+            ) : null}
           </div>
         </div>
         <div className="flex flex-col items-center">
