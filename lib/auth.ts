@@ -5,6 +5,7 @@ interface token {
   expires_in: string;
 }
 export async function createSession(token: token) {
+  console.log(token);
   const date = new Date();
   const addDay = Number.parseInt(token.expires_in.charAt(0), 10);
   date.setDate(date.getDate() + addDay);

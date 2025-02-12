@@ -3,7 +3,7 @@
 import { createSession } from "@/lib/auth";
 import { Mode } from "@/lib/constants";
 import { SignupFormSchema } from "@/lib/definitions";
-import axios, { HttpStatusCode } from "axios";
+import axios from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -64,26 +64,20 @@ export async function login(prevState: unknown, formData: FormData) {
     };
   }
 
-  try {
-    const url = "http://localhost:3333/auth/login";
-    const data: { access_token: string; expires_in: string } = await userApi(
-      email,
-      password,
-      url
-    );
+  const url = "http://localhost:3333/auth/login";
+  const user = await userApi(email, password, url);
 
-    await createSession(data);
-    redirect("/dashboard");
-  } catch (error) {
-    if (isSqliteConstraintUniqueError(error)) {
-      return {
-        errors: {
-          email: "Email already exists.",
-        },
-      };
-    }
-    throw error;
+  if (!user.success) {
+    return {
+      errors: {
+        email: user.message,
+      },
+    };
   }
+  const data: { access_token: string; expires_in: string } = user.data;
+
+  await createSession(data);
+  redirect("/dashboard");
 }
 
 export async function auth(mode: Mode, prevState: unknown, formData: FormData) {
@@ -109,11 +103,24 @@ export async function userApi(email: string, password: string, url: string) {
         },
       }
     );
-    if (response.status !== HttpStatusCode.Ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-    return response.data;
+
+    return {
+      success: true,
+      data: response.data,
+    };
   } catch (error) {
-    console.log("Error creating user:", error);
+    if (axios.isAxiosError(error)) {
+      return {
+        success: false,
+        message:
+          error.response?.data?.message ||
+          "An error occurred while connecting to the server.",
+      };
+    } else {
+      return {
+        success: false,
+        message: "An unexpected error occurred.",
+      };
+    }
   }
 }

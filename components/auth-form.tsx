@@ -20,11 +20,6 @@ export default function AuthForm({ mode }: { mode: Mode }) {
         <label htmlFor="email">Email</label>
         <input type="email" name="email" id="email" />
       </p>
-      {state?.errors?.["email" as keyof typeof state.errors] && (
-        <p id="form-errors">
-          {state.errors["email" as keyof typeof state.errors]}
-        </p>
-      )}
       <p>
         <label htmlFor="password">Password</label>
         <input type="password" name="password" id="password" />
