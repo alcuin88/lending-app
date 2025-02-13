@@ -1,4 +1,4 @@
-import AuthForm from "@/components/auth-form";
+import AuthForm from "@/components/auth/auth-form";
 import { Mode } from "@/lib/constants";
 
 type SearchParams = Promise<{ [key: string]: Mode }>;

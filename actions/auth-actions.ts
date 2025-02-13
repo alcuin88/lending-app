@@ -22,31 +22,19 @@ export async function SignUp(prevState: unknown, formData: FormData) {
     };
   }
 
-  try {
-    const url = "http://localhost:3333/auth/signup";
-    await userApi(email, password, url);
-    redirect("/?mode=login");
-  } catch (error) {
-    if (isSqliteConstraintUniqueError(error)) {
-      return {
-        errors: {
-          email: "Email already exists.",
-        },
-      };
-    }
-    throw error;
+  const url = "http://localhost:3333/auth/signup";
+  const user = await userApi(email, password, url);
+  if (!user.success) {
+    return {
+      errors: {
+        error: [user.message],
+      },
+    };
   }
-}
+  const data: { access_token: string; expires_in: string } = user.data;
 
-function isSqliteConstraintUniqueError(
-  error: unknown
-): error is { code: string } {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    (error as { code: string }).code === "SQLITE_CONSTRAINT_UNIQUE"
-  );
+  await createSession(data);
+  redirect("/dashboard");
 }
 
 export async function login(prevState: unknown, formData: FormData) {
@@ -70,7 +58,7 @@ export async function login(prevState: unknown, formData: FormData) {
   if (!user.success) {
     return {
       errors: {
-        email: user.message,
+        error: [user.message],
       },
     };
   }
@@ -89,6 +77,7 @@ export async function auth(mode: Mode, prevState: unknown, formData: FormData) {
 
 export async function logout() {
   (await cookies()).delete("access_token");
+  (await cookies()).delete("clientId");
   redirect("/");
 }
 
