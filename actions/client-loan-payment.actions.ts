@@ -61,28 +61,22 @@ export async function formControl(prevState: unknown, formData: FormData) {
     }
 
     redirect("/client-profile");
-  } else if (type == SubmitType.payment && loan_id) {
-    const payment: Payment = {
-      amount: amount,
-      created_at: new Date(date),
-      remarks: remarks,
-      loan_id: +loan_id,
-      payment_id: 0,
-      client_id: client_id,
-    };
-    await postPayment(payment, token);
-    redirect(`/client-profile/${loan_id}`);
   } else {
     const payment: Payment = {
       client_id: client_id,
       amount: amount,
       created_at: new Date(date),
       remarks: remarks,
-      loan_id: 0,
+      loan_id: loan_id ? +loan_id : 0,
       payment_id: 0,
     };
-    await postPayment(payment, token);
-    redirect(`/client-profile`);
+    const paymentResponse = await postPayment(payment, token);
+    if (paymentResponse?.error) {
+      return {
+        errors: [paymentResponse?.error],
+      };
+    }
+    redirect(loan_id ? `/client-profile/${loan_id}` : `/client-profile`);
   }
 }
 
@@ -98,7 +92,7 @@ async function postPayment(payment: Payment, token: string) {
         loan_id: payment.loan_id.toString(),
         client_id: payment.client_id.toString(),
         created_at: payment.created_at.toISOString(),
-      }).toString(),
+      }),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -107,11 +101,28 @@ async function postPayment(payment: Payment, token: string) {
       }
     );
     if (response.status !== HttpStatusCode.Created) {
-      throw new Error(`Error: ${response.statusText}`);
+      console.error(
+        "Unexpected status code:",
+        response.status,
+        response.statusText
+      );
+      throw new Error(`Server error: ${response.statusText}`);
     }
-    return response.data;
-  } catch {
-    throw new Error("Failed to create new client.");
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      if (error.response) {
+        return {
+          error: error.response.data.message,
+        };
+      } else if (error.request) {
+        return {
+          error: "No response from server.",
+        };
+      }
+    }
+    return {
+      error: "An unexpected error occurred.",
+    };
   }
 }
 
@@ -170,21 +181,14 @@ export async function getPaymentById(
 }
 
 export async function getClientById(client_id: number, token: string) {
-  const url = "http://localhost:3333/client/id";
+  const url = `http://localhost:3333/client/${client_id}`;
 
   try {
-    const response = await axios.post(
-      url,
-      new URLSearchParams({
-        client_id: client_id.toString(),
-      }).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+    const response = await axios.get(url, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
 
     if (response.status !== HttpStatusCode.Ok) {
       throw new Error(`Error: ${response.statusText}`);

@@ -18,7 +18,7 @@ export default async function LoanDetailCard({
 
   const status = loan.status ? (
     <div className="bg-green-100 px-3 py-1 rounded-full text-sm font-medium">
-      <p className="text-green-700">Active</p>
+      <p className="text-green-700">{loan.status}</p>
     </div>
   ) : (
     <div className="bg-red-100 px-3 py-1 rounded-full text-sm font-medium">
@@ -66,7 +66,7 @@ export default async function LoanDetailCard({
           Purpose
         </label>
         <textarea
-          className="w-full border rounded p-2"
+          className="w-full border rounded p-2 pointer-events-none"
           id="remarks"
           rows={2}
           readOnly

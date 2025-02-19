@@ -23,7 +23,7 @@ export default function LoanCard({ loan }: props) {
           <p className="text-sm text-gray-700 w-2/5 text-left">
             {loan.purpose}
           </p>
-          <p className="text-2xl font-semibold w-2/5 text-left mr-2">{`Balance: ₱ ${new Intl.NumberFormat().format(
+          <p className="text-l font-semibold w-2/5 text-left mr-2">{`Balance: ₱ ${new Intl.NumberFormat().format(
             loan.balance
           )}`}</p>
         </div>

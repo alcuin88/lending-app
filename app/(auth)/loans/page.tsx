@@ -6,6 +6,15 @@ import { Client, Loan, LoanList } from "@/lib/interface";
 export default async function Loans() {
   const token = await verifySession();
   const data = await fetchClients(token);
+
+  if (data.length === 0) {
+    return (
+      <div className="flex flex-wrap items-start justify-center bg-gray-100 gap-3 p-4">
+        <p>No records found!</p>
+      </div>
+    );
+  }
+
   const loanList: LoanList[] = [];
   data.forEach((client: Client) => {
     let totalPayments = 0;

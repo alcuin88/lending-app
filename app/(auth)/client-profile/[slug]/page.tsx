@@ -78,6 +78,7 @@ export default async function LoanDetailPage({
           <LoanDetailCard loan={loan} client={client} payments={payments} />
           <div className="flex flex-col bg-white p-6 w-full max-w-2xl mt-4 rounded-lg shadow-md border border-gray-200">
             <MyForm
+              status={loan.status === "Active" ? true : false}
               client_id={loan.client_id}
               loan_id={loan_id}
               type={SubmitType.payment}

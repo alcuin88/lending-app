@@ -14,7 +14,11 @@ export default async function Dashboard() {
   const loanList: LoanList[] = [];
 
   if (data.length === 0) {
-    return <p>No records found!</p>;
+    return (
+      <div className="flex flex-wrap items-start justify-center bg-gray-100 gap-3 p-4">
+        <p>No records found!</p>
+      </div>
+    );
   }
 
   data.forEach((client: Client) => {
@@ -42,11 +46,11 @@ export default async function Dashboard() {
       <div className="flex flex-wrap items-start justify-center bg-gray-100 gap-3 p-4">
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md ">
           <h1>Total Active Loans</h1>
-          <p className="text-5xl">{activeLoans.toString()}</p>
+          <p className="text-2xl">{activeLoans.toString()}</p>
         </div>
         <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md ">
           <h1>Total Outstanding Amount</h1>
-          <p className="text-5xl">{`₱ ${new Intl.NumberFormat().format(
+          <p className="text-2xl">{`₱ ${new Intl.NumberFormat().format(
             outstandingAmount
           )}`}</p>
         </div>

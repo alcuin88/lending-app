@@ -9,16 +9,21 @@ interface props {
   type: SubmitType;
   client_id?: number;
   loan_id?: number;
+  status: boolean;
 }
 
-export default function MyForm({ type, client_id, loan_id }: props) {
+export default function MyForm({ type, client_id, loan_id, status }: props) {
   const [state, formState] = useActionState(formControl, {
     errors: [],
   });
 
   const header = type === SubmitType.loan ? "Loan Form" : "Payment Form";
   return (
-    <div>
+    <div
+      className={
+        !status ? "pointer-events-none opacity-50 grayscale" : undefined
+      }
+    >
       <div className="flex w-full items-center justify-center mb-2 font-bold">
         <h1>{header}</h1>
       </div>

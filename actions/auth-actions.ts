@@ -7,7 +7,24 @@ import axios from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-export async function SignUp(prevState: unknown, formData: FormData) {
+interface payload {
+  email: string;
+  password: string;
+  url: string;
+}
+
+export async function formSelect(
+  mode: Mode,
+  prevState: unknown,
+  formData: FormData
+) {
+  if (mode === Mode.login) {
+    return login(prevState, formData);
+  }
+  return SignUp(prevState, formData);
+}
+
+async function SignUp(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -23,21 +40,15 @@ export async function SignUp(prevState: unknown, formData: FormData) {
   }
 
   const url = "http://localhost:3333/auth/signup";
-  const user = await userApi(email, password, url);
-  if (!user.success) {
-    return {
-      errors: {
-        error: [user.message],
-      },
-    };
-  }
-  const data: { access_token: string; expires_in: string } = user.data;
-
-  await createSession(data);
-  redirect("/dashboard");
+  const payload: payload = {
+    email,
+    password,
+    url,
+  };
+  return auth(payload);
 }
 
-export async function login(prevState: unknown, formData: FormData) {
+async function login(prevState: unknown, formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
@@ -53,7 +64,16 @@ export async function login(prevState: unknown, formData: FormData) {
   }
 
   const url = "http://localhost:3333/auth/login";
-  const user = await userApi(email, password, url);
+  const payload: payload = {
+    email,
+    password,
+    url,
+  };
+  return auth(payload);
+}
+
+async function auth(payload: payload) {
+  const user = await userApi(payload.email, payload.password, payload.url);
 
   if (!user.success) {
     return {
@@ -62,21 +82,16 @@ export async function login(prevState: unknown, formData: FormData) {
       },
     };
   }
-  const data: { access_token: string; expires_in: string } = user.data;
+  const data: { access_token: string; expires_in: string; email: string } =
+    user.data;
 
   await createSession(data);
   redirect("/dashboard");
 }
 
-export async function auth(mode: Mode, prevState: unknown, formData: FormData) {
-  if (mode === Mode.login) {
-    return login(prevState, formData);
-  }
-  return SignUp(prevState, formData);
-}
-
 export async function logout() {
   (await cookies()).delete("access_token");
+  (await cookies()).delete("user_email");
   (await cookies()).delete("clientId");
   redirect("/");
 }

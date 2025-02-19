@@ -20,14 +20,20 @@ export default async function ClientList() {
 
   const clientCard = () => {
     if (clients.length === 0) {
-      return <p>No Clients for this user.</p>;
+      return (
+        <div className="items-start justify-center bg-white min-h-screen p-4">
+          <p>No Clients for this user.</p>
+        </div>
+      );
     }
     const client = clients.find((client) => client.client_id === clientId);
 
     clients.forEach((client) => {
       if (client.client_id === clientId) {
         client.loans.forEach((loan) => {
-          currentLoans.push(loan);
+          if (loan.status === "Active") {
+            currentLoans.push(loan);
+          }
         });
       }
     });
@@ -44,6 +50,7 @@ export default async function ClientList() {
       return null;
     } else {
       const totalActiveLoans = currentLoans.length;
+      const status = totalActiveLoans > 0 ? true : false;
       const totalAmount = currentLoans.reduce(
         (total, loan) => total + loan.balance,
         0
@@ -56,7 +63,7 @@ export default async function ClientList() {
               totalActiveLoans={totalActiveLoans}
               totalAmount={totalAmount}
             />
-            <FormToggle clientId={clientId} />
+            <FormToggle status={status} clientId={clientId} />
           </div>
           <div className="grid grid-cols-2 w-full gap-8 mt-4">
             <div className="w-full justify-items-center">

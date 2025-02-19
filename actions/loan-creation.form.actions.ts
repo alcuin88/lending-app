@@ -113,14 +113,14 @@ export async function getClientByName(
   token: string
 ) {
   const clientURL = "http://localhost:3333/client";
-
+  console.log(`GET CLIENT NAME: ${first_name} ${last_name} ${token}`);
   try {
     const response = await axios.post(
       clientURL,
       new URLSearchParams({
-        first_name: first_name,
-        last_name: last_name,
-      }).toString(),
+        first_name,
+        last_name,
+      }),
       {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
@@ -128,6 +128,7 @@ export async function getClientByName(
         },
       }
     );
+
     if (!response.status) {
       throw new Error(response.status.toString());
     }

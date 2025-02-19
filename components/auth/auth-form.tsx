@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "@/actions/auth-actions";
+import { formSelect } from "@/actions/auth-actions";
 import Link from "next/link";
 import { useActionState } from "react";
 import logo from "@/public/images/auth-icon.jpg";
@@ -9,7 +9,7 @@ import Image from "next/image";
 import FormSubmit from "./form-submit";
 
 export default function AuthForm({ mode }: { mode: Mode }) {
-  const [state, formState] = useActionState(auth.bind(null, mode), {
+  const [state, formState] = useActionState(formSelect.bind(null, mode), {
     errors: {},
   });
 
