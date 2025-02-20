@@ -13,6 +13,8 @@ interface payload {
   url: string;
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 export async function formSelect(
   mode: Mode,
   prevState: unknown,
@@ -39,7 +41,7 @@ async function SignUp(prevState: unknown, formData: FormData) {
     };
   }
 
-  const url = "http://localhost:3333/auth/signup";
+  const url = `${API_URL}/auth/signup`;
   const payload: payload = {
     email,
     password,
@@ -63,7 +65,8 @@ async function login(prevState: unknown, formData: FormData) {
     };
   }
 
-  const url = "http://localhost:3333/auth/login";
+  const url = `${API_URL}/auth/login`;
+  console.log(url);
   const payload: payload = {
     email,
     password,

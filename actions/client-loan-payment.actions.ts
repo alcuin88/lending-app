@@ -6,6 +6,8 @@ import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+
 export async function formControl(prevState: unknown, formData: FormData) {
   const token = (await cookies()).get("access_token")?.value as string;
   const date = formData.get("date") as string;
@@ -42,7 +44,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
     };
 
     try {
-      const url = "http://localhost:3333/loan/new";
+      const url = `${API_URL}/loan/new`;
       const response = await axios.post(
         url,
         new URLSearchParams(loan).toString(),
@@ -81,7 +83,7 @@ export async function formControl(prevState: unknown, formData: FormData) {
 }
 
 async function postPayment(payment: Payment, token: string) {
-  const url = "http://localhost:3333/payment/new";
+  const url = `${API_URL}/payment/new`;
 
   try {
     const response = await axios.post(
@@ -127,7 +129,7 @@ async function postPayment(payment: Payment, token: string) {
 }
 
 export async function getLoanById(loan_id: number, token: string) {
-  const url = "http://localhost:3333/loan/id";
+  const url = `${API_URL}/loan/id`;
 
   try {
     const response = await axios.post(
@@ -155,7 +157,7 @@ export async function getPaymentById(
   loan_id: number,
   token: string
 ): Promise<Payment[]> {
-  const url = "http://localhost:3333/payment/id";
+  const url = `${API_URL}/payment/id`;
 
   try {
     const response = await axios.post(
@@ -181,7 +183,7 @@ export async function getPaymentById(
 }
 
 export async function getClientById(client_id: number, token: string) {
-  const url = `http://localhost:3333/client/${client_id}`;
+  const url = `${API_URL}/client/${client_id}`;
 
   try {
     const response = await axios.get(url, {

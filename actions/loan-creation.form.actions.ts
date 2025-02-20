@@ -5,8 +5,10 @@ import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+
 export async function CreateLoan(prevState: unknown, formData: FormData) {
-  const loanURL = "http://localhost:3333/loan/new";
+  const loanURL = `${API_URL}/loan/new`;
   const token = formData.get("token") as string;
   const firstName = formData.get("first-name") as string;
   const lastname = formData.get("last-name") as string;
@@ -84,7 +86,7 @@ async function createClient(
   last_name: string,
   token: string
 ) {
-  const clientURL = "http://localhost:3333/client/create";
+  const clientURL = `${API_URL}/client/create`;
   try {
     const res = await axios.post(
       clientURL,
@@ -112,7 +114,7 @@ export async function getClientByName(
   last_name: string,
   token: string
 ) {
-  const clientURL = "http://localhost:3333/client";
+  const clientURL = `${API_URL}/client`;
   console.log(`GET CLIENT NAME: ${first_name} ${last_name} ${token}`);
   try {
     const response = await axios.post(
@@ -151,7 +153,7 @@ export async function getClientIdFromSearch() {
 }
 
 export async function fetchClients(token: string): Promise<Client[]> {
-  const url = "http://localhost:3333/client/all";
+  const url = `${API_URL}/client/all`;
   const client: Client[] = [];
   try {
     const response = await axios.get(url, {

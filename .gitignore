@@ -41,3 +41,7 @@ next-env.d.ts
 loans.db
 loans.db
 *.db
+
+# Docker build files
+Dockerfile
+docker-compose-yml
