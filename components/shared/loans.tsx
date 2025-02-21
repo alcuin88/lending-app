@@ -3,26 +3,50 @@ import { LoanList } from "@/lib/interface";
 export default function LoanTable({ loans }: { loans: LoanList[] }) {
   return (
     <div className="w-full mt-4">
-      <div className="bg-gray-200 text-gray-700 font-medium grid grid-cols-5 border border-gray-300 rounded-t-md px-4 py-2">
+      {/* Table Header */}
+      <div className="hidden md:grid bg-gray-200 text-gray-700 font-medium grid-cols-5 border border-gray-300 rounded-t-md px-4 py-2">
         <div className="w-1">#</div>
         <div>Name</div>
         <div>Total Loan Amount</div>
         <div>Payments</div>
         <div>Outstanding Balance</div>
       </div>
+
+      {/* Table Body */}
       <div className="border border-gray-300 rounded-b-md divide-y divide-gray-300">
         {loans.map((item, index) => (
           <div
             key={item.client_id}
-            className={`grid grid-cols-5 px-4 py-2 ${
+            className={`grid md:grid-cols-5 px-4 py-2 ${
               index % 2 === 0 ? "bg-white" : "bg-gray-50"
-            }`}
+            } flex flex-col md:flex-row gap-2 md:gap-0`}
           >
-            <div className="text-gray-600 w-1">{index + 1}</div>
-            <div className="text-gray-700">{`${item.last_name}, ${item.first_name}`}</div>
-            <div className="text-gray-600">{item.totalLoans}</div>
-            <div className="text-gray-600">{item.totalPayments}</div>
+            {/* Mobile Numbering */}
+            <div className="md:w-1 md:text-center font-bold text-gray-600">
+              {index + 1}
+            </div>
+
+            {/* Name */}
+            <div className="text-gray-700">
+              <span className="md:hidden font-medium">Name: </span>
+              {`${item.last_name}, ${item.first_name}`}
+            </div>
+
+            {/* Total Loan Amount */}
             <div className="text-gray-600">
+              <span className="md:hidden font-medium">Total Loan: </span>
+              {item.totalLoans}
+            </div>
+
+            {/* Payments */}
+            <div className="text-gray-600">
+              <span className="md:hidden font-medium">Payments: </span>
+              {item.totalPayments}
+            </div>
+
+            {/* Outstanding Balance */}
+            <div className="text-gray-600">
+              <span className="md:hidden font-medium">Balance: </span>
               {item.totalLoans - item.totalPayments}
             </div>
           </div>

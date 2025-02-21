@@ -6,19 +6,23 @@ import { usePathname } from "next/navigation";
 interface props {
   href: string;
   children: React.ReactNode;
+  setIsOpenAction: (isOpen: boolean) => void;
 }
 
-export default function NavLink({ href, children }: props) {
+export default function NavLink({ href, children, setIsOpenAction }: props) {
   const path = usePathname();
+
+  function onClick() {
+    setIsOpenAction(false);
+  }
 
   return (
     <Link
+      onClick={onClick}
       href={href}
-      className={
-        path.startsWith(href)
-          ? "no-underline bg-[#f1f5f9] py-2 px-4 rounded hover:bg-[#f1f5f9]"
-          : "py-2 px-4 rounded hover:bg-[#f1f5f9]"
-      }
+      className={`block py-2 px-4 rounded-md hover:bg-[#f1f5f9] ${
+        path.startsWith(href) ?? "no-underline bg-[#f1f5f9]/[80%]"
+      }`}
     >
       {children}
     </Link>

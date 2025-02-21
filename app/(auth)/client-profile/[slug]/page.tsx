@@ -18,7 +18,7 @@ export default async function LoanDetailPage({
     slug: number;
   }>;
 }) {
-  const token = await verifySession();
+  const { token } = await verifySession();
 
   const loan_id = (await params).slug;
 

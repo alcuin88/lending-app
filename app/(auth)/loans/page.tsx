@@ -4,7 +4,7 @@ import LoanTable from "@/components/shared/loans";
 import { Client, Loan, LoanList } from "@/lib/interface";
 
 export default async function Loans() {
-  const token = await verifySession();
+  const { token } = await verifySession();
   const data = await fetchClients(token);
 
   if (data.length === 0) {

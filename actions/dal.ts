@@ -6,10 +6,10 @@ import { redirect } from "next/navigation";
 
 export const verifySession = cache(async () => {
   const token = (await cookies()).get("access_token")?.value as string;
-
+  const email = (await cookies()).get("user_email")?.value as string;
   if (!token) {
     redirect("/");
   }
 
-  return token;
+  return { token, email };
 });

@@ -5,8 +5,8 @@ import LoanTable from "@/components/shared/loans";
 import { Client, Loan, LoanList } from "@/lib/interface";
 
 export default async function Dashboard() {
-  const token = await verifySession();
-
+  const { token, email } = await verifySession();
+  const user_email = email.split("@")[0];
   const data: Client[] = await fetchClients(token);
 
   let activeLoans = 0;
@@ -43,19 +43,26 @@ export default async function Dashboard() {
 
   return (
     <>
-      <div className="flex flex-wrap items-start justify-center bg-gray-100 gap-3 p-4">
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md ">
-          <h1>Total Active Loans</h1>
-          <p className="text-2xl">{activeLoans.toString()}</p>
+      <h1 className="text-2xl sm:text-3xl font-semibold text-gray-800">
+        Welcome, {user_email}!
+      </h1>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 bg-gray-100">
+        <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+          <h1 className="text-lg font-semibold text-gray-700">
+            Total Active Loans
+          </h1>
+          <p className="text-3xl font-bold">{activeLoans.toString()}</p>
         </div>
-        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md ">
-          <h1>Total Outstanding Amount</h1>
-          <p className="text-2xl">{`₱ ${new Intl.NumberFormat().format(
+        <div className="bg-white p-6 rounded-lg shadow-lg flex flex-col items-center">
+          <h1 className="text-lg font-semibold text-gray-700">
+            Total Outstanding Amount
+          </h1>
+          <p className="text-3xl font-bold">{`₱ ${new Intl.NumberFormat().format(
             outstandingAmount
           )}`}</p>
         </div>
       </div>
-      <div className="box-content h-96 w-full overflow-y-auto overflow-x-hidden p-4">
+      <div className="box-content w-full h-[32rem] sm:h-96 overflow-y-auto p-4 bg-white shadow-lg rounded-lg">
         <LoanTable loans={loanList} />
       </div>
     </>

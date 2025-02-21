@@ -18,7 +18,7 @@ export default function AuthForm({ mode }: { mode: Mode }) {
       const errorMessage: [] = state.errors[key as keyof typeof state.errors];
 
       return (
-        <div className="text-red-700">
+        <div className="text-[#a21d4c] list-none">
           <ul>
             {errorMessage.map((error) => {
               return <li key={error}>{error}</li>;
@@ -30,31 +30,64 @@ export default function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <form action={formState} id="auth-form">
-      <div>
-        <Image src={logo} alt="A lock icon" priority />
+    <form
+      action={formState}
+      className="w-[90%] max-w-2xl rounded-lg p-12 mx-auto mt-20 md:bg-gray-400 md:shadow-lg"
+    >
+      <div className="flex justify-center">
+        <Image
+          src={logo}
+          alt="A lock icon"
+          priority
+          className="w-24 h-24 rounded-full drop-shadow-md"
+        />
       </div>
-      <p>
-        <label htmlFor="email">Email</label>
-        <input type="email" name="email" id="email" />
+      <p className="mb-4">
+        <label htmlFor="email" className="block mb-1 font-bold text-gray-700">
+          Email
+        </label>
+        <input
+          type="email"
+          name="email"
+          id="email"
+          className="w-full p-2 rounded bg-gray-300 text-gray-700 border-none"
+        />
       </p>
 
       {errorCheck("email")}
       <p>
-        <label htmlFor="password">Password</label>
-        <input type="password" name="password" id="password" />
+        <label
+          htmlFor="password"
+          className="block mb-1 font-bold text-gray-700"
+        >
+          Password
+        </label>
+        <input
+          type="password"
+          name="password"
+          id="password"
+          className="w-full p-2 rounded bg-gray-300 text-gray-700 border-none"
+        />
       </p>
 
       {errorCheck("password")}
 
-      <FormSubmit mode={mode} />
+      <FormSubmit mode={mode} state={state} />
       {errorCheck("error")}
-      <p>
+      <p className="text-center mt-4">
         {mode === Mode.login && (
-          <Link href={`/?mode=${Mode.signup}`}>Create an account.</Link>
+          <Link
+            href={`/?mode=${Mode.signup}`}
+            className="text-purple-900 hover:text-purple-700"
+          >
+            Create an account.
+          </Link>
         )}
         {mode === Mode.signup && (
-          <Link href={`/?mode=${Mode.login}`}>
+          <Link
+            href={`/?mode=${Mode.login}`}
+            className="text-purple-900 hover:text-purple-700"
+          >
             Login with existing account.
           </Link>
         )}

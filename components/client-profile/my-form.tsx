@@ -78,7 +78,7 @@ export default function MyForm({ type, client_id, loan_id, status }: props) {
         {state?.errors && (
           <ul className="flex flex-col items-end">
             {state.errors.map((error) => (
-              <li className="my-1.5 text-[#F4511E]" key={error}>
+              <li className="text-[#a21d4c] list-none" key={error}>
                 {error}
               </li>
             ))}

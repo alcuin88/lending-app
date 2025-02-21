@@ -158,7 +158,7 @@ export async function getPaymentById(
   token: string
 ): Promise<Payment[]> {
   const url = `${API_URL}/payment/id`;
-
+  console.log(url);
   try {
     const response = await axios.post(
       url,

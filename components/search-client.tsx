@@ -47,8 +47,7 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
   };
 
   return (
-    <div className="static w-80">
-      {/* Input Field */}
+    <div className="static w-80 sm:w-80">
       <input
         id="search"
         type="text"
@@ -57,10 +56,9 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
         placeholder="Search..."
         className="w-full px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         onFocus={() => inputValue && setDropdownVisible(true)}
-        onBlur={() => setTimeout(() => setDropdownVisible(false), 200)} // Delay to allow option selection
+        onBlur={() => setTimeout(() => setDropdownVisible(false), 200)}
       />
 
-      {/* Dropdown Menu */}
       {dropdownVisible && (
         <ul className="absolute z-10 w-80 bg-white border border-gray-300 rounded-lg shadow-lg mt-1">
           {clients
