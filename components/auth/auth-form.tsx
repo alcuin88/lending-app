@@ -2,16 +2,27 @@
 
 import { formSelect } from "@/actions/auth-actions";
 import Link from "next/link";
-import { useActionState } from "react";
+import { useActionState, useTransition } from "react";
 import logo from "@/public/images/auth-icon.jpg";
 import { Mode } from "@/lib/constants";
 import Image from "next/image";
 import FormSubmit from "./form-submit";
+import { useRouter } from "next/navigation";
 
 export default function AuthForm({ mode }: { mode: Mode }) {
-  const [state, formState] = useActionState(formSelect.bind(null, mode), {
-    errors: {},
-  });
+  // const [state, formState] = useActionState(formSelect.bind(null, mode), {
+  //   errors: {},
+  // });
+
+  const [state, formState] = useActionState(
+    async (_prevState: unknown, formData: FormData) => {
+      return await formSelect(mode, null, formData);
+    },
+    { errors: {} }
+  );
+
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   function errorCheck(key: string) {
     if (state?.errors?.[key as keyof typeof state.errors]) {
@@ -72,23 +83,35 @@ export default function AuthForm({ mode }: { mode: Mode }) {
 
       {errorCheck("password")}
 
-      <FormSubmit mode={mode} state={state} />
+      <FormSubmit mode={mode} state={state} isLoading={isPending} />
       {errorCheck("error")}
       <p className="text-center mt-4">
         {mode === Mode.login && (
           <Link
+            onClick={(e) => {
+              e.preventDefault();
+              startTransition(() => {
+                router.push(`/?mode=${Mode.signup}`);
+              });
+            }}
             href={`/?mode=${Mode.signup}`}
             className="text-purple-900 hover:text-purple-700"
           >
-            Create an account.
+            {isPending ? "Switching..." : "Create an account."}
           </Link>
         )}
         {mode === Mode.signup && (
           <Link
+            onClick={(e) => {
+              e.preventDefault();
+              startTransition(() => {
+                router.push(`/?mode=${Mode.login}`);
+              });
+            }}
             href={`/?mode=${Mode.login}`}
             className="text-purple-900 hover:text-purple-700"
           >
-            Login with existing account.
+            {isPending ? "Switching..." : "Login with existing account."}
           </Link>
         )}
       </p>
