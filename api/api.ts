@@ -47,29 +47,64 @@ export async function PostAPI<T extends object>(
 
 export async function GetAPI(url: string, token: string) {
   try {
-    const response = await axios.get(url, {
+    const response = await fetch(url, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
+      cache: "force-cache",
+      next: {
+        revalidate: 3600,
+      },
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(
+        errorData.message || "An error occurred while connecting to the server."
+      );
+    }
+
+    const data = await response.json();
     return {
       success: true,
-      data: response.data,
+      data,
     };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message ||
-          "An error occurred while connecting to the server.",
-      };
-    } else {
-      return {
-        success: false,
-        message: "An unexpected error occurred.",
-      };
-    }
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
+    };
   }
 }
+
+// export async function GetAPI(url: string, token: string) {
+//   try {
+//     const response = await axios.get(url, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     return {
+//       success: true,
+//       data: response.data,
+//     };
+//   } catch (error) {
+//     if (axios.isAxiosError(error)) {
+//       return {
+//         success: false,
+//         message:
+//           error.response?.data?.message ||
+//           "An error occurred while connecting to the server.",
+//       };
+//     } else {
+//       return {
+//         success: false,
+//         message: "An unexpected error occurred.",
+//       };
+//     }
+//   }
+// }
