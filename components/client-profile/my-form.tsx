@@ -43,9 +43,11 @@ export default function MyForm({ type, client_id, loan_id, status }: props) {
             </label>
             <input
               className="w-full border rounded p-2"
-              type="text"
+              type="number"
               id="amount"
               name="amount"
+              min="0"
+              required
             ></input>
           </div>
 

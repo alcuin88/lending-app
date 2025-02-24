@@ -36,6 +36,7 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
     }
 
     if (e.target.value === "") {
+      setDropdownVisible(true);
       setClientIdFromSearch(0);
     }
   };
@@ -51,8 +52,10 @@ export default function SearchClient({ clients }: { clients: Client[] }) {
       <input
         id="search"
         type="text"
+        autoComplete="off"
         value={inputValue}
         onChange={handleInputChange}
+        onClick={() => setDropdownVisible(true)}
         placeholder="Search..."
         className="w-full px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
         onFocus={() => inputValue && setDropdownVisible(true)}
