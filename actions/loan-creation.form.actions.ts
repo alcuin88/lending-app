@@ -1,14 +1,13 @@
 "use server";
 
+import { GetAPI, PostAPI } from "@/api";
 import { Client } from "@/lib/interface";
-import axios, { HttpStatusCode } from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
-  const loanURL = `${API_URL}/loan/new`;
   const token = formData.get("token") as string;
   const firstName = formData.get("first-name") as string;
   const lastname = formData.get("last-name") as string;
@@ -46,8 +45,6 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id = client.client_id;
   }
 
-  console.log(client_id);
-
   const loan = {
     amount: amount.toString(),
     balance: amount.toString(),
@@ -55,30 +52,25 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id: client_id.toString(),
   };
 
-  try {
-    const res = await axios.post(
-      loanURL,
-      new URLSearchParams(loan).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-
-    if (res.status !== HttpStatusCode.Ok) {
-      throw new Error(`Error: ${res.statusText}`);
-    }
-  } catch (error) {
-    console.error("Request failed:", error);
-    throw new Error(`Error: ${error}`);
-  }
+  await postLoan(loan, token);
 
   const cookieStore = cookies();
   (await cookieStore).set("clientId", client_id.toString());
 
   redirect("/client-profile");
+}
+
+async function postLoan(loan: object, token: string) {
+  const loanURL = `${API_URL}/loan/new`;
+  const res = await PostAPI(loan, loanURL, token);
+
+  if (!res.success) {
+    return {
+      errors: {
+        error: res.message,
+      },
+    };
+  }
 }
 
 async function createClient(
@@ -87,26 +79,21 @@ async function createClient(
   token: string
 ) {
   const clientURL = `${API_URL}/client/create`;
-  try {
-    const res = await axios.post(
-      clientURL,
-      new URLSearchParams({
-        first_name: first_name,
-        last_name: last_name,
-        token,
-      }).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
+  const payload = { first_name, last_name };
 
-    return res.data.client_id;
-  } catch {
-    throw new Error("Failed to create new client.");
+  const client = await PostAPI(payload, clientURL, token);
+
+  if (!client.success) {
+    return {
+      errors: {
+        error: [client.message],
+      },
+    };
   }
+
+  const { client_id } = client.data;
+
+  return client_id;
 }
 
 export async function getClientByName(
@@ -115,29 +102,18 @@ export async function getClientByName(
   token: string
 ) {
   const clientURL = `${API_URL}/client`;
-  console.log(`GET CLIENT NAME: ${first_name} ${last_name} ${token}`);
-  try {
-    const response = await axios.post(
-      clientURL,
-      new URLSearchParams({
-        first_name,
-        last_name,
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
 
-    if (!response.status) {
-      throw new Error(response.status.toString());
-    }
-    return response.data;
-  } catch (error) {
-    throw new Error(`Error posting loan: ${error}`);
+  const client = await PostAPI({ first_name, last_name }, clientURL, token);
+
+  if (!client.success) {
+    return {
+      errors: {
+        error: [client.message],
+      },
+    };
   }
+
+  return client.data;
 }
 
 export async function setClientIdFromSearch(id: number) {
@@ -154,21 +130,12 @@ export async function getClientIdFromSearch() {
 
 export async function fetchClients(token: string): Promise<Client[]> {
   const url = `${API_URL}/client/all`;
-  const client: Client[] = [];
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-    if (response.status !== HttpStatusCode.Ok) {
-      return redirect("/");
-    }
-    const fetchedClient = response.data as Client[];
-    client.push(...fetchedClient);
-  } catch (error) {
-    console.log("Error creating user:", error);
+
+  const clients = await GetAPI(url, token);
+
+  if (!clients.success) {
+    return [];
   }
-  return client;
+
+  return clients.data;
 }

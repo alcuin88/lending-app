@@ -8,7 +8,7 @@ import { notFound } from "next/navigation";
 import {
   getClientById,
   getLoanById,
-  getPaymentById,
+  getLoanPayments,
 } from "@/actions/client-loan-payment.actions";
 
 export default async function LoanDetailPage({
@@ -26,7 +26,7 @@ export default async function LoanDetailPage({
     notFound();
   }
 
-  const payments = await getPaymentById(loan_id, token);
+  const payments = await getLoanPayments(loan_id, token);
   const loan = await getLoanById(loan_id, token);
 
   if (!loan) {
@@ -34,7 +34,7 @@ export default async function LoanDetailPage({
   }
   const client = await getClientById(loan.client_id, token);
 
-  if (!client) {
+  if (!client || client === null) {
     notFound();
   }
 

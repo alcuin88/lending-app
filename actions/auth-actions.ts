@@ -1,17 +1,11 @@
 "use server";
 
+import { PostAPI } from "@/api";
 import { createSession } from "@/lib/auth";
 import { Mode } from "@/lib/constants";
 import { SignupFormSchema } from "@/lib/definitions";
-import axios from "axios";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-
-interface payload {
-  email: string;
-  password: string;
-  url: string;
-}
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -42,12 +36,11 @@ async function SignUp(prevState: unknown, formData: FormData) {
   }
 
   const url = `${API_URL}/auth/signup`;
-  const payload: payload = {
+  const payload = {
     email,
     password,
-    url,
   };
-  return auth(payload);
+  return auth(payload, url);
 }
 
 async function login(prevState: unknown, formData: FormData) {
@@ -66,17 +59,15 @@ async function login(prevState: unknown, formData: FormData) {
   }
 
   const url = `${API_URL}/auth/login`;
-  console.log(url);
-  const payload: payload = {
+  const payload = {
     email,
     password,
-    url,
   };
-  return auth(payload);
+  return auth(payload, url);
 }
 
-async function auth(payload: payload) {
-  const user = await userApi(payload.email, payload.password, payload.url);
+async function auth(payload: { email: string; password: string }, url: string) {
+  const user = await PostAPI(payload, url);
 
   if (!user.success) {
     return {
@@ -97,37 +88,4 @@ export async function logout() {
   (await cookies()).delete("user_email");
   (await cookies()).delete("clientId");
   redirect("/");
-}
-
-export async function userApi(email: string, password: string, url: string) {
-  try {
-    const response = await axios.post(
-      url,
-      new URLSearchParams({ email, password }).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      }
-    );
-
-    return {
-      success: true,
-      data: response.data,
-    };
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message ||
-          "An error occurred while connecting to the server.",
-      };
-    } else {
-      return {
-        success: false,
-        message: "An unexpected error occurred.",
-      };
-    }
-  }
 }

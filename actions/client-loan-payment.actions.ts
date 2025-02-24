@@ -1,8 +1,8 @@
 "use server";
 
+import { GetAPI, PostAPI } from "@/api";
 import { SubmitType } from "@/lib/constants";
-import { Payment } from "@/lib/interface";
-import axios, { HttpStatusCode } from "axios";
+import { Client, Payment } from "@/lib/interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -43,23 +43,12 @@ export async function formControl(prevState: unknown, formData: FormData) {
       client_id: client_id.toString(),
     };
 
-    try {
-      const url = `${API_URL}/loan/new`;
-      const response = await axios.post(
-        url,
-        new URLSearchParams(loan).toString(),
-        {
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      if (response.status !== HttpStatusCode.Ok) {
-        throw new Error(`Error: ${response.statusText}`);
-      }
-    } catch (error) {
-      throw new Error(`Error posting loan: ${error}`);
+    const loanResponse = await postLoan(loan, token);
+
+    if (loanResponse?.errors) {
+      return {
+        errors: loanResponse.errors.error,
+      };
     }
 
     redirect("/client-profile");
@@ -73,131 +62,83 @@ export async function formControl(prevState: unknown, formData: FormData) {
       payment_id: 0,
     };
     const paymentResponse = await postPayment(payment, token);
-    if (paymentResponse?.error) {
+    if (paymentResponse?.errors) {
       return {
-        errors: [paymentResponse?.error],
+        errors: [...paymentResponse?.errors.error],
       };
     }
     redirect(loan_id ? `/client-profile/${loan_id}` : `/client-profile`);
   }
 }
 
-async function postPayment(payment: Payment, token: string) {
+async function postLoan(payload: object, token: string) {
+  const url = `${API_URL}/loan/new`;
+
+  const loan = await PostAPI<object>(payload, url, token);
+
+  if (!loan.success) {
+    return {
+      errors: {
+        error: [loan.message],
+      },
+    };
+  }
+}
+
+async function postPayment(payload: Payment, token: string) {
   const url = `${API_URL}/payment/new`;
 
-  try {
-    const response = await axios.post(
-      url,
-      new URLSearchParams({
-        amount: payment.amount.toString(),
-        remarks: payment.remarks,
-        loan_id: payment.loan_id.toString(),
-        client_id: payment.client_id.toString(),
-        created_at: payment.created_at.toISOString(),
-      }),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (response.status !== HttpStatusCode.Created) {
-      console.error(
-        "Unexpected status code:",
-        response.status,
-        response.statusText
-      );
-      throw new Error(`Server error: ${response.statusText}`);
-    }
-  } catch (error) {
-    if (axios.isAxiosError(error)) {
-      if (error.response) {
-        return {
-          error: error.response.data.message,
-        };
-      } else if (error.request) {
-        return {
-          error: "No response from server.",
-        };
-      }
-    }
+  const payment = await PostAPI<Payment>(payload, url, token);
+
+  if (!payment.success) {
     return {
-      error: "An unexpected error occurred.",
+      errors: {
+        error: [payment.message],
+      },
     };
   }
 }
 
 export async function getLoanById(loan_id: number, token: string) {
-  const url = `${API_URL}/loan/id`;
+  const url = `${API_URL}/loan/${loan_id}`;
+  const loan = await GetAPI(url, token);
 
-  try {
-    const response = await axios.post(
-      url,
-      new URLSearchParams({
-        loan_id: loan_id.toString(),
-      }).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (response.status !== HttpStatusCode.Ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-    return response.data;
-  } catch {
-    throw new Error(`Failed to fetch Loan with loan_id: ${loan_id}`);
+  if (!loan.success) {
+    return {
+      errors: {
+        error: [loan.message],
+      },
+    };
   }
+
+  return loan.data;
 }
 
-export async function getPaymentById(
+export async function getLoanPayments(
   loan_id: number,
   token: string
 ): Promise<Payment[]> {
-  const url = `${API_URL}/payment/id`;
-  console.log(url);
-  try {
-    const response = await axios.post(
-      url,
-      new URLSearchParams({
-        loan_id: loan_id.toString(),
-      }).toString(),
-      {
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-    if (response.status !== HttpStatusCode.Ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-    return response.data;
-  } catch (err) {
-    console.log(err);
-    throw new Error("Failed to fetch Payment.");
+  const url = `${API_URL}/payment/${loan_id}`;
+
+  const payment = await GetAPI(url, token);
+
+  if (!payment.success) {
+    return [];
   }
+
+  return payment.data;
 }
 
-export async function getClientById(client_id: number, token: string) {
+export async function getClientById(
+  client_id: number,
+  token: string
+): Promise<Client | null> {
   const url = `${API_URL}/client/${client_id}`;
+  const client = await GetAPI(url, token);
 
-  try {
-    const response = await axios.get(url, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (response.status !== HttpStatusCode.Ok) {
-      throw new Error(`Error: ${response.statusText}`);
-    }
-
-    return response.data;
-  } catch {
-    throw new Error(`Failed to fetch Client with client_id: ${client_id}`);
+  if (!client.success) {
+    return null;
   }
+
+  return client.data as Client;
 }

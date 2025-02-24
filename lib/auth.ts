@@ -6,10 +6,9 @@ interface token {
   email: string;
 }
 export async function createSession(token: token) {
-  console.log(token);
-  const date = new Date();
-  const addDay = Number.parseInt(token.expires_in.charAt(0), 10);
-  date.setDate(date.getDate() + addDay);
+  const addMilliseconds = Number(token.expires_in) * 1000;
+  const now = new Date();
+  const expires = now.getTime() + addMilliseconds;
 
   const cookieStore = await cookies();
   cookieStore.set("access_token", token.access_token, {
@@ -17,13 +16,13 @@ export async function createSession(token: token) {
     secure: true,
     sameSite: "lax",
     path: "/",
-    expires: date,
+    expires: expires,
   });
   cookieStore.set("user_email", token.email, {
     httpOnly: true,
     secure: true,
     sameSite: "lax",
     path: "/",
-    expires: date,
+    expires: expires,
   });
 }
