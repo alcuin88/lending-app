@@ -29,7 +29,7 @@ export default async function LoanDetailPage({
   const payments = await getLoanPayments(loan_id, token);
   const loan = await getLoanById(loan_id, token);
 
-  if (!loan) {
+  if (!loan || loan === null) {
     notFound();
   }
   const client = await getClientById(loan.client_id, token);

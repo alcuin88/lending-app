@@ -2,7 +2,7 @@
 
 import { GetAPI, PostAPI } from "@/api";
 import { SubmitType } from "@/lib/constants";
-import { Client, Payment } from "@/lib/interface";
+import { Client, Loan, Payment } from "@/lib/interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -99,16 +99,15 @@ async function postPayment(payload: Payment, token: string) {
   }
 }
 
-export async function getLoanById(loan_id: number, token: string) {
+export async function getLoanById(
+  loan_id: number,
+  token: string
+): Promise<Loan | null> {
   const url = `${API_URL}/loan/${loan_id}`;
   const loan = await GetAPI(url, token);
 
   if (!loan.success) {
-    return {
-      errors: {
-        error: [loan.message],
-      },
-    };
+    return null;
   }
 
   return loan.data;
