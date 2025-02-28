@@ -1,47 +1,39 @@
-import axios from "axios";
+import { revalidatePath } from "next/cache";
 
 export async function PostAPI<T extends object>(
-  payload: T | URLSearchParams,
+  payload: T,
   url: string,
   token?: string
 ) {
   try {
-    const formattedData =
-      payload instanceof URLSearchParams
-        ? payload
-        : new URLSearchParams(
-            Object.entries(payload).reduce((acc, [key, value]) => {
-              acc[key] =
-                value instanceof Date ? value.toISOString() : String(value);
-              return acc;
-            }, {} as Record<string, string>)
-          ).toString();
+    const formattedData = JSON.stringify(payload);
 
-    const response = await axios.post(url, formattedData, {
+    const response = await fetch(url, {
+      method: "POST",
       headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
+      body: formattedData,
     });
 
+    if (!response.ok) {
+      throw new Error(`Server responded with ${response.status}`);
+    }
+
+    const data = await response.json();
     return {
       success: true,
-      data: response.data,
+      data,
     };
   } catch (error) {
-    if (axios.isAxiosError(error)) {
-      return {
-        success: false,
-        message:
-          error.response?.data?.message ||
-          "An error occurred while connecting to the server.",
-      };
-    } else {
-      return {
-        success: false,
-        message: "An unexpected error occurred.",
-      };
-    }
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An unexpected error occurred.",
+    };
   }
 }
 
@@ -52,9 +44,9 @@ export async function GetAPI(url: string, token: string) {
         Authorization: `Bearer ${token}`,
       },
       cache: "force-cache",
-      next: {
-        revalidate: 3600,
-      },
+      // next: {
+      //   revalidate: 3600,
+      // },
     });
 
     if (!response.ok) {
@@ -80,31 +72,9 @@ export async function GetAPI(url: string, token: string) {
   }
 }
 
-// export async function GetAPI(url: string, token: string) {
-//   try {
-//     const response = await axios.get(url, {
-//       headers: {
-//         Authorization: `Bearer ${token}`,
-//       },
-//     });
-
-//     return {
-//       success: true,
-//       data: response.data,
-//     };
-//   } catch (error) {
-//     if (axios.isAxiosError(error)) {
-//       return {
-//         success: false,
-//         message:
-//           error.response?.data?.message ||
-//           "An error occurred while connecting to the server.",
-//       };
-//     } else {
-//       return {
-//         success: false,
-//         message: "An unexpected error occurred.",
-//       };
-//     }
-//   }
-// }
+export function Revalidate() {
+  revalidatePath(`/dashboard`);
+  revalidatePath(`/dashboard`);
+  revalidatePath(`/loans`);
+  revalidatePath(`/client-profile`);
+}

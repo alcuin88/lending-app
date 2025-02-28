@@ -5,7 +5,7 @@ import { Client, Loan, LoanList } from "@/lib/interface";
 
 export default async function Loans() {
   const { token } = await verifySession();
-  const data = await fetchClients(token);
+  const data: Client[] = await fetchClients(token);
 
   if (data.length === 0) {
     return (
@@ -15,24 +15,30 @@ export default async function Loans() {
     );
   }
 
-  const loanList: LoanList[] = [];
-  data.forEach((client: Client) => {
-    let totalPayments = 0;
-    let totalLoans = 0;
-    client.loans.forEach((loan: Loan) => {
-      if (loan.status) {
-        totalPayments += loan.amount - loan.balance;
-        totalLoans += loan.amount;
-      }
-    });
-    loanList.push({
+  const loanList = processLoanData(data);
+
+  return <LoanTable loans={loanList} />;
+}
+
+function processLoanData(clients: Client[]): LoanList[] {
+  return clients.map((client) => {
+    const { totalLoans, totalPayments } = client.loans.reduce(
+      (acc, loan: Loan) => {
+        if (loan.status === "Active" || loan.status === "Paid") {
+          acc.totalPayments += loan.amount - loan.balance;
+          acc.totalLoans += loan.amount;
+        }
+        return acc;
+      },
+      { totalLoans: 0, totalPayments: 0 }
+    );
+
+    return {
       client_id: client.client_id,
       last_name: client.last_name,
       first_name: client.first_name,
       totalLoans,
       totalPayments,
-    });
+    };
   });
-
-  return <LoanTable loans={loanList} />;
 }

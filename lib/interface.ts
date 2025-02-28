@@ -25,6 +25,7 @@ export interface Payment {
   remarks: string;
   created_at: Date;
   loan_id: number;
+  status: string;
   client_id: number;
 }
 

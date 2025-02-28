@@ -10,10 +10,6 @@ import FormSubmit from "./form-submit";
 import { useRouter } from "next/navigation";
 
 export default function AuthForm({ mode }: { mode: Mode }) {
-  // const [state, formState] = useActionState(formSelect.bind(null, mode), {
-  //   errors: {},
-  // });
-
   const [state, formState] = useActionState(
     async (_prevState: unknown, formData: FormData) => {
       return await formSelect(mode, null, formData);

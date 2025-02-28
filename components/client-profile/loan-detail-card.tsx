@@ -1,5 +1,6 @@
 import { Client, Loan, Payment } from "@/lib/interface";
 import { notFound } from "next/navigation";
+import DeleteLoanButton from "./delete-button";
 
 interface props {
   client: Client;
@@ -61,18 +62,13 @@ export default async function LoanDetailCard({
         <span className="text-xl">💰</span>
       </div>
 
-      <div>
+      <div className="flex gap-2">
         <label className="block font-bold mb-2" htmlFor="remarks">
-          Purpose
+          Purpose:
         </label>
-        <textarea
-          className="w-full border rounded p-2 pointer-events-none"
-          id="remarks"
-          rows={2}
-          readOnly
-          value={loan.purpose || ""}
-        />
+        <p className="w-full">{loan.purpose || ""}</p>
       </div>
+      <DeleteLoanButton loan_id={loan.loan_id} />
     </div>
   );
 }

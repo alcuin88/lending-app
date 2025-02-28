@@ -1,27 +1,42 @@
 import axios from "axios";
 import { redirect } from "next/navigation";
 
-export default function ErrorHandling(error: unknown) {
-  const errorObj: { error: string[] } = {
-    error: [],
+export default function HandleError(error: unknown): { errors: string[] } {
+  const errorObj: { errors: string[] } = {
+    errors: [],
   };
   if (axios.isAxiosError(error)) {
+    console.log("AXIOS Error:", error);
+
     if (error.response) {
       const status = error.response.status;
-      console.log(error.response);
+
       if (status === 401) {
         redirect("/");
       }
-      error.response.data?.message.forEach((message: string) => {
-        errorObj.error.push(message);
-      });
+
+      const messages = error.response.data?.message;
+
+      if (Array.isArray(messages)) {
+        errorObj.errors.push(...messages);
+      } else if (typeof messages === "string") {
+        errorObj.errors.push(messages);
+      } else {
+        errorObj.errors.push("An unknown server error occurred.");
+      }
     } else if (error.request) {
-      errorObj.error.push("No response received from server.");
+      errorObj.errors.push(
+        "No response received from the server. Please check your internet connection."
+      );
     } else {
-      errorObj.error.push(`Request error: ${error.message}`);
+      errorObj.errors.push(`Request error: ${error.message}`);
     }
+  } else if (error instanceof Error) {
+    console.log("Unexpected Error:", error);
+    errorObj.errors.push("An unexpected error occurred. Please try again.");
   } else {
-    errorObj.error.push(`Unexpected error: ${error}`);
+    console.log("Unknown Error Type:", error);
+    errorObj.errors.push("Something went wrong. Please contact support.");
   }
   return errorObj;
 }

@@ -1,6 +1,6 @@
 "use server";
 
-import { GetAPI, PostAPI } from "@/api";
+import { GetAPI, PostAPI, Revalidate } from "@/api";
 import { Client } from "@/lib/interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -56,7 +56,7 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 
   const cookieStore = cookies();
   (await cookieStore).set("clientId", client_id.toString());
-
+  Revalidate();
   redirect("/client-profile");
 }
 
