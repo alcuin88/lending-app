@@ -1,6 +1,6 @@
 "use server";
 
-import { GetAPI, PostAPI, Revalidate } from "@/api";
+import { GetAPI, PostAPI } from "@/api";
 import { Client } from "@/lib/interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
@@ -9,38 +9,44 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
   const token = formData.get("token") as string;
-  const firstName = formData.get("first-name") as string;
-  const lastname = formData.get("last-name") as string;
-  const amount = formData.get("amount") as unknown as number;
-  const purpose = formData.get("purpose") as string;
+  const firstName = (formData.get("first-name") as string) ?? "";
+  const lastName = (formData.get("last-name") as string) ?? "";
+  const amount = Number(formData.get("amount") ?? 0);
+  const purpose = (formData.get("purpose") as string) ?? "";
   const errors: string[] = [];
 
   let client_id = 0;
 
-  if (!firstName || firstName.trim().length === 0) {
+  if (!firstName.trim()) {
     errors.push("First name is required.");
   }
 
-  if (!lastname || lastname.trim().length === 0) {
+  if (!lastName.trim()) {
     errors.push("Last name is required.");
   }
 
-  if (!amount || amount === 0) {
-    errors.push("Amount should be non zero.");
+  if (amount <= 0 || isNaN(amount)) {
+    errors.push("Amount should be greater than zero.");
   }
 
-  if (!purpose || purpose.trim().length === 0) {
-    errors.push("Content is required.");
+  if (!purpose.trim()) {
+    errors.push("Purpose is required.");
   }
 
   if (errors.length > 0) {
     return { errors };
   }
 
-  const client = await getClientByName(firstName, lastname, token);
+  const client = await getClientByName(firstName, lastName, token);
+
+  if (!client.success) {
+    console.log(client.errors);
+    errors.push(client.errors);
+    return { errors };
+  }
 
   if (!client) {
-    client_id = await createClient(firstName, lastname, token);
+    client_id = await createClient(firstName, lastName, token);
   } else {
     client_id = client.client_id;
   }
@@ -56,7 +62,6 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 
   const cookieStore = cookies();
   (await cookieStore).set("clientId", client_id.toString());
-  Revalidate();
   redirect("/client-profile");
 }
 
@@ -107,9 +112,7 @@ export async function getClientByName(
 
   if (!client.success) {
     return {
-      errors: {
-        error: [client.message],
-      },
+      errors: [client.message],
     };
   }
 
