@@ -72,7 +72,7 @@ async function auth(payload: { email: string; password: string }, url: string) {
   if (!user.success) {
     return {
       errors: {
-        error: [user.message],
+        error: [user.errors],
       },
     };
   }

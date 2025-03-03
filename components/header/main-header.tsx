@@ -7,10 +7,15 @@ import logo from "@/public/images/money-icon.png";
 import logout_img from "@/public/images/logout.png";
 import { logout } from "@/actions/auth-actions";
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 
 export default function MainHeader() {
   const [isOpen, setIsOpen] = useState(false);
+  const path = usePathname();
 
+  if (path === "/") {
+    return null;
+  }
   return (
     <header className="flex justify-between items-center p-4 w-full rounded-lg border-none border-gray-200 shadow-md bg-white relative">
       {/* Logo */}

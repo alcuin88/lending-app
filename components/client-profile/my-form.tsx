@@ -79,7 +79,7 @@ export default function MyForm({ type, client_id, loan_id, status }: props) {
         <FormSubmit type={type} />
         {state?.errors && (
           <ul className="flex flex-col items-end">
-            {state.errors.map((error) => (
+            {state.errors.map((error: string) => (
               <li className="text-[#a21d4c] list-none" key={error}>
                 {error}
               </li>

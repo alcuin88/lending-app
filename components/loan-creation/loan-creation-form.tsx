@@ -85,7 +85,7 @@ export default function LoanCreationForm({ token }: { token: string }) {
       {/* Error Messages */}
       {state?.errors && (
         <ul className="mt-4 text-right">
-          {state.errors.map((error) => (
+          {state.errors.map((error: string) => (
             <li className="text-red-600 list-none text-sm" key={error}>
               {error}
             </li>

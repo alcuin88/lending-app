@@ -28,7 +28,7 @@ export default async function ClientList() {
   if (!client) {
     return (
       <div className="items-start justify-center bg-white min-h-screen p-4">
-        <p>Client not found.</p>
+        <SearchClient clients={clients} />
       </div>
     );
   }

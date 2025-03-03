@@ -1,11 +1,11 @@
 "use server";
 
-import { GetAPI, PostAPI } from "@/api";
+import { GetAPI, PostAPI, Revalidate } from "@/api";
 import { Client } from "@/lib/interface";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3333";
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3333";
 
 export async function CreateLoan(prevState: unknown, formData: FormData) {
   const token = formData.get("token") as string;
@@ -39,14 +39,19 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 
   const client = await getClientByName(firstName, lastName, token);
 
-  if (!client.success) {
-    console.log(client.errors);
-    errors.push(client.errors);
-    return { errors };
+  if (client && "errors" in client) {
+    console.log(...client.errors);
+    return { errors: client.errors };
   }
 
   if (!client) {
-    client_id = await createClient(firstName, lastName, token);
+    const createdClient = await createClient(firstName, lastName, token);
+
+    if (typeof createdClient === "object" && "errors" in createdClient) {
+      return { errors: createdClient.errors };
+    }
+
+    client_id = createdClient;
   } else {
     client_id = client.client_id;
   }
@@ -58,7 +63,12 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
     client_id: client_id.toString(),
   };
 
-  await postLoan(loan, token);
+  const createdLaon = await postLoan(loan, token);
+
+  if ("errors" in createdLaon) {
+    return { errors: createdLaon.errors };
+  }
+  Revalidate();
 
   const cookieStore = cookies();
   (await cookieStore).set("clientId", client_id.toString());
@@ -68,35 +78,38 @@ export async function CreateLoan(prevState: unknown, formData: FormData) {
 async function postLoan(loan: object, token: string) {
   const loanURL = `${API_URL}/loan/new`;
   const res = await PostAPI(loan, loanURL, token);
-
+  console.log(res);
   if (!res.success) {
     return {
-      errors: {
-        error: res.message,
-      },
+      errors: res.errors ?? ["An unknown error occurred."],
     };
   }
+
+  return res.data;
 }
 
 async function createClient(
   first_name: string,
   last_name: string,
   token: string
-) {
+): Promise<number | { errors: string[] }> {
   const clientURL = `${API_URL}/client/create`;
-  const payload = { first_name, last_name };
+  const payload = {
+    first_name,
+    last_name,
+  };
 
   const client = await PostAPI(payload, clientURL, token);
 
   if (!client.success) {
     return {
-      errors: {
-        error: [client.message],
-      },
+      errors: client.errors ?? ["An unknown error occurred."],
     };
   }
 
   const { client_id } = client.data;
+
+  console.log(client_id);
 
   return client_id;
 }
@@ -105,18 +118,22 @@ export async function getClientByName(
   first_name: string,
   last_name: string,
   token: string
-) {
+): Promise<Client | { errors: string[] } | undefined> {
   const clientURL = `${API_URL}/client`;
 
-  const client = await PostAPI({ first_name, last_name }, clientURL, token);
+  const response = await PostAPI({ first_name, last_name }, clientURL, token);
 
-  if (!client.success) {
+  if (!response.success || !response.data) {
     return {
-      errors: [client.message],
+      errors: response.errors ?? ["An unknown error occurred."],
     };
   }
 
-  return client.data;
+  if (!response.data.client) {
+    return undefined;
+  }
+
+  return response.data.client;
 }
 
 export async function setClientIdFromSearch(id: number) {

@@ -1,3 +1,4 @@
+import HandleError from "@/lib/error-handling";
 import { revalidatePath } from "next/cache";
 
 export async function PostAPI<T extends object>(
@@ -18,21 +19,21 @@ export async function PostAPI<T extends object>(
     });
 
     if (!response.ok) {
-      throw new Error(`Server responded with ${response.status}`);
+      const error = await response.json();
+      throw new Error(error.message);
     }
 
     const data = await response.json();
+
     return {
       success: true,
       data,
     };
   } catch (error) {
+    const { errors } = HandleError(error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred.",
+      errors,
     };
   }
 }
@@ -62,12 +63,10 @@ export async function GetAPI(url: string, token: string) {
       data,
     };
   } catch (error) {
+    const { errors } = HandleError(error);
     return {
       success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "An unexpected error occurred.",
+      errors,
     };
   }
 }

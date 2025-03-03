@@ -43,9 +43,9 @@ export async function formControl(prevState: unknown, formData: FormData) {
     };
 
     const loanResponse = await postLoan(loan, token);
-    if (loanResponse?.errors) return { errors: loanResponse.errors };
+    if (loanResponse) return loanResponse;
 
-    redirect("/client-profile");
+    Revalidate();
   } else {
     const parsedDate = isNaN(Date.parse(date as string))
       ? new Date()
@@ -59,8 +59,9 @@ export async function formControl(prevState: unknown, formData: FormData) {
       payment_id: 0,
       status: "Active",
     };
+    Revalidate();
     const paymentResponse = await postPayment(payment, token);
-    if (paymentResponse?.errors) return { errors: paymentResponse.errors };
+    if (paymentResponse) return paymentResponse;
 
     redirect(loan_id ? `/client-profile/${loan_id}` : `/client-profile`);
   }
@@ -71,7 +72,9 @@ async function postLoan(payload: object, token: string) {
 
   const response = await PostAPI<object>(payload, url, token);
 
-  return response.success ? null : { errors: [response.message] };
+  return response.success
+    ? console.log(response)
+    : { errors: response.errors ?? ["An unknown error occurred."] };
 }
 
 async function postPayment(payload: Payment, token: string) {
@@ -79,7 +82,9 @@ async function postPayment(payload: Payment, token: string) {
 
   const response = await PostAPI<Payment>(payload, url, token);
 
-  return response.success ? null : { errors: [response.message] };
+  return response.success
+    ? console.log(response)
+    : { errors: response.errors ?? ["An unknown error occurred."] };
 }
 
 export async function getLoanById(
