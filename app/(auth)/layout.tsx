@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "../globals.css";
 import { Suspense } from "react";
-import Loading from "../loading";
+import Loading from "./loading";
 
 export const metadata: Metadata = {
   title: "Money Lending App",
