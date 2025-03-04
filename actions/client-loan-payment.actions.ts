@@ -4,6 +4,7 @@ import { GetAPI, PostAPI, Revalidate } from "@/api";
 import { SubmitType } from "@/lib/constants";
 import HandleError from "@/lib/error-handling";
 import { Client, Loan, Payment } from "@/lib/interface";
+import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -59,11 +60,12 @@ export async function formControl(prevState: unknown, formData: FormData) {
       payment_id: 0,
       status: "Active",
     };
-    Revalidate();
     const paymentResponse = await postPayment(payment, token);
     if (paymentResponse) return paymentResponse;
 
-    redirect(loan_id ? `/client-profile/${loan_id}` : `/client-profile`);
+    revalidatePath(`/client-profile/*`);
+    revalidatePath(`/client-profile`);
+    Revalidate();
   }
 }
 
@@ -102,9 +104,9 @@ export async function getLoanPayments(
   token: string
 ): Promise<Payment[]> {
   const url = `${API_URL}/payment/${loan_id}`;
-
   const response = await GetAPI(url, token);
-
+  console.log(response);
+  // Revalidate();
   return response.success ? response.data : null;
 }
 

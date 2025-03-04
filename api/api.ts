@@ -44,10 +44,6 @@ export async function GetAPI(url: string, token: string) {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-      cache: "force-cache",
-      // next: {
-      //   revalidate: 3600,
-      // },
     });
 
     if (!response.ok) {
@@ -58,6 +54,7 @@ export async function GetAPI(url: string, token: string) {
     }
 
     const data = await response.json();
+
     return {
       success: true,
       data,

@@ -87,10 +87,10 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             onClick={(e) => {
               e.preventDefault();
               startTransition(() => {
-                router.push(`/?mode=${Mode.signup}`);
+                router.push(`/${Mode.signup}`);
               });
             }}
-            href={`/?mode=${Mode.signup}`}
+            href={`/${Mode.signup}`}
             className="text-purple-900 hover:text-purple-700"
           >
             {isPending ? "Switching..." : "Create an account."}
@@ -101,10 +101,10 @@ export default function AuthForm({ mode }: { mode: Mode }) {
             onClick={(e) => {
               e.preventDefault();
               startTransition(() => {
-                router.push(`/?mode=${Mode.login}`);
+                router.push(`/${Mode.login}`);
               });
             }}
-            href={`/?mode=${Mode.login}`}
+            href={`/${Mode.login}`}
             className="text-purple-900 hover:text-purple-700"
           >
             {isPending ? "Switching..." : "Login with existing account."}

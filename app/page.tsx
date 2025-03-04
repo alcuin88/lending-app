@@ -1,10 +1,5 @@
-import AuthForm from "@/components/auth/auth-form";
-import { Mode } from "@/lib/constants";
+import LendingAppLanding from "@/components/landing-page/landing-page";
 
-type SearchParams = Promise<{ [key: string]: Mode }>;
-
-export default async function Home(props: { searchParams: SearchParams }) {
-  const searchParams = await props.searchParams;
-  const formMode = searchParams.mode || Mode.login;
-  return <AuthForm mode={formMode} />;
+export default async function Home() {
+  return <LendingAppLanding />;
 }
